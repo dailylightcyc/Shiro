@@ -17,7 +17,15 @@ import { TagDetailModal } from './fab/PostTagsFAB'
 
 export const PostMetaBar: Component<{
   meta: Partial<
-    Pick<PostModel, 'created' | 'modified' | 'category' | 'tags' | 'count'>
+    Pick<
+      PostModel,
+      | 'createdAt'
+      | 'modifiedAt'
+      | 'category'
+      | 'tags'
+      | 'readCount'
+      | 'likeCount'
+    >
   >
 }> = ({ className, meta, children }) => {
   const { present } = useModalStack()
@@ -30,15 +38,15 @@ export const PostMetaBar: Component<{
       )}
     >
       <div className="flex min-w-0 items-center space-x-1">
-        {!!meta.created && (
+        {!!meta.createdAt && (
           <>
             <MdiClockOutline />
             <span>
-              <RelativeTime date={meta.created} />
+              <RelativeTime date={meta.createdAt} />
             </span>
           </>
         )}
-        {meta.modified ? (
+        {meta.modifiedAt ? (
           isClient ? (
             <FloatPopover
               mobileAsSheet
@@ -47,7 +55,7 @@ export const PostMetaBar: Component<{
               type="tooltip"
               triggerElement="(已编辑)"
             >
-              编辑于 <RelativeTime date={meta.modified} />
+              编辑于 <RelativeTime date={meta.modifiedAt} />
             </FloatPopover>
           ) : (
             <span className="text-xs">(已编辑)</span>
@@ -94,19 +102,19 @@ export const PostMetaBar: Component<{
         </div>
       )}
 
-      {!!meta.count?.read && (
+      {!!meta.readCount && (
         <div className="flex min-w-0 items-center space-x-1">
           <i className="i-mingcute-eye-2-line" />
           <span className="min-w-0 truncate">
-            <NumberSmoothTransition>{meta.count.read}</NumberSmoothTransition>
+            <NumberSmoothTransition>{meta.readCount}</NumberSmoothTransition>
           </span>
         </div>
       )}
-      {!!meta.count?.like && (
+      {!!meta.likeCount && (
         <div className="flex min-w-0 items-center space-x-1">
           <ThumbsupIcon />
           <span className="min-w-0 truncate">
-            <NumberSmoothTransition>{meta.count.like}</NumberSmoothTransition>
+            <NumberSmoothTransition>{meta.likeCount}</NumberSmoothTransition>
           </span>
         </div>
       )}

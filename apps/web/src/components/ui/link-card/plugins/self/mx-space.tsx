@@ -52,7 +52,7 @@ export const mxSpacePlugin: LinkCardPlugin = {
     let data: {
       title: string
       text?: string
-      images?: { src: string }[]
+      images?: { src: string }[] | null
       meta?: Record<string, any> | null
       cover?: string
       summary?: string | null
@@ -64,7 +64,7 @@ export const mxSpacePlugin: LinkCardPlugin = {
     } else if (type === 'notes') {
       const [nid] = rest
       const response = await apiClient.note.getNoteById(+nid)
-      data = response.data
+      data = response
     }
 
     const coverImage = data.cover || data.meta?.cover

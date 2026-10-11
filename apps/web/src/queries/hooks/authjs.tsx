@@ -18,10 +18,8 @@ export const useAuthProviders = () => {
     queryKey: ['providers'],
     queryFn: () =>
       apiClient.proxy.auth.providers
-        .get<{
-          data: AuthSocialProviders[]
-        }>()
-        .then((res) => res.data),
+        .get<AuthSocialProviders[]>()
+        .then((res) => res.$serialized),
     refetchOnMount: 'always',
     meta: {
       persist: true,

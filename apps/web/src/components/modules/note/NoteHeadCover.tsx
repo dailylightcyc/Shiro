@@ -64,7 +64,7 @@ export const NoteHeadCover = ({ image }: { image?: string }) => {
 const NoteHeadCoverImpl = ({ image }: { image: string }) => {
   const [imageBlob, setImageBlob] = useState<string | null>(null)
   const imageInfo = useCurrentNoteDataSelector((state) =>
-    state?.data.images?.find((i) => i.src === image),
+    state?.images?.find((i) => i.src === image),
   )
   const accentColor = imageInfo?.accent
   useLayoutEffect(() => {

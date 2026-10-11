@@ -1,10 +1,8 @@
 import type { Metadata, Viewport } from 'next'
-import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { PublicEnvScript } from 'next-runtime-env'
-import { fetch } from 'ofetch'
 import type { PropsWithChildren } from 'react'
 
 import PKG from '~/../package.json'
@@ -185,23 +183,8 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   const themeConfig = data.theme
 
-  const headers = new Headers()
-
-  headers.append(
-    'cookie',
-    (await cookies())
-      .getAll()
-      .map((cookie) => `${cookie.name}=${cookie.value}`)
-      .join('; '),
-  )
-
-  headers.append('user-agent', 'Shiro')
-
-  const userAuth = await fetch(
-    apiClient.proxy('owner')('check_logged').toString(true),
-    { headers },
-  )
-    .then((res) => res.json())
+  const userAuth = await apiClient.owner
+    .checkTokenValid()
     .then((res) => !!res.ok)
     .catch(() => false)
 

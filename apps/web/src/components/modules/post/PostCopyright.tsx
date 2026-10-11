@@ -9,7 +9,6 @@ import { toast } from '~/lib/toast'
 import { useCurrentPostDataSelector } from '~/providers/post/CurrentPostDataProvider'
 import { useAggregationSelector } from '~/providers/root/aggregation-data-provider'
 
-
 export const PostCopyright: FC = () => {
   const t = useTranslations('post')
   const tCommon = useTranslations('common')
@@ -24,7 +23,7 @@ export const PostCopyright: FC = () => {
       return {
         title: data.title,
         link: `${webUrl}/posts/${data.category.slug}/${data.slug}`,
-        date: data.modified,
+        date: data.modifiedAt,
       }
     },
     [webUrl],

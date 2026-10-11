@@ -15,9 +15,6 @@ export const uploadFileToServer = (type: FileTypeEnum, file: File) => {
     url: string
   }>({
     data: formData,
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
     params: {
       type,
     },

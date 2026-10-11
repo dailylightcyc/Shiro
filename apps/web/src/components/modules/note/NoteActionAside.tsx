@@ -4,6 +4,7 @@ import { m, useAnimationControls } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
 import { useIsMobile } from '~/atoms/hooks/viewport'
+import { useCanComment } from '~/components/modules/comment/permissions'
 import { MotionButtonBase } from '~/components/ui/button'
 import { useModalStack } from '~/components/ui/modal'
 import { NumberSmoothTransition } from '~/components/ui/number-transition/NumberSmoothTransition'
@@ -60,13 +61,13 @@ export const NoteActionAside: Component = ({ className }) => (
 )
 
 const NoteAsideCommentButton = () => {
-  const { title, id, allowComment } =
+  const allowComment = useCanComment()
+  const { title, id } =
     useCurrentNoteDataSelector((_data) => {
-      const { data } = _data || {}
+      const data = _data
       return {
         title: data?.title,
         id: data?.id,
-        allowComment: data?.allowComment,
       }
     }) || {}
 
@@ -82,25 +83,27 @@ const LikeButton = () => {
   const control = useAnimationControls()
   const [update] = useForceUpdate()
 
-  const likeCount = useCurrentNoteDataSelector((data) => data?.data.count.like)
-  const id = useCurrentNoteDataSelector((data) => data?.data.id)
+  const likeCount = useCurrentNoteDataSelector((data) => data?.likeCount)
+  const serverLiked = useCurrentNoteDataSelector((data) => data?.isLiked)
+  const id = useCurrentNoteDataSelector((data) => data?.id)
   const nid = useCurrentNoteNid()
 
   if (!id) return null
 
   const handleLike = () => {
-    if (isLikedBefore(id)) return
+    if (serverLiked || isLikedBefore(id)) return
     if (!nid) return
     apiClient.activity.likeIt('Note', id).then(() => {
       setLikeId(id)
       setCurrentNoteData((draft) => {
-        draft.data.count.like += 1
+        draft.likeCount += 1
+        draft.isLiked = true
       })
       update()
     })
   }
 
-  const isLiked = isLikedBefore(id)
+  const isLiked = serverLiked || isLikedBefore(id)
 
   return (
     <MotionButtonBase
@@ -176,7 +179,7 @@ const ShareButton = () => {
       aria-label={t('aria_share_note')}
       className="flex flex-col space-y-2"
       onClick={() => {
-        const note = getCurrentNoteData()?.data
+        const note = getCurrentNoteData()
 
         if (!note) return
 

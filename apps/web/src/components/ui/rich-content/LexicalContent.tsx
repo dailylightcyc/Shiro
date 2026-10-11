@@ -23,6 +23,7 @@ import { useCallback, useMemo } from 'react'
 
 import { getWebUrl } from '~/atoms'
 import { useModalStack } from '~/components/ui/modal/stacked/provider'
+import { API_URL } from '~/constants/env'
 import { useIsDark } from '~/hooks/common/use-is-dark'
 import { fetchGitHubApi } from '~/lib/github'
 
@@ -84,8 +85,11 @@ const linkCardFetchContext: LinkCardFetchContext = {
     },
     'mx-space': {
       request: async (path) => {
-        const r = await fetch(`/api/v2/${path}`)
-        return await r.json()
+        const r = await fetch(
+          `${API_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`,
+          { credentials: 'include' },
+        )
+        return (await r.json()).data
       },
     },
   },

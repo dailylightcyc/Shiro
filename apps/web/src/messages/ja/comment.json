@@ -30,6 +30,8 @@
   "submit_success": "投稿成功！",
   "reply_success": "返信ありがとうございます！",
   "comment_success": "コメントありがとうございます！",
+  "moderation_pending": "コメントを送信しました。承認をお待ちください。",
+  "moderation_rejected": "コメントは承認されませんでした。",
   "sending": "送信中...",
   "send": "送信",
   "deleted_placeholder": "このコメントは削除されました",

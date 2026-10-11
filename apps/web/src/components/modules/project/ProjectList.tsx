@@ -7,9 +7,9 @@ import { ProjectIcon } from './ProjectIcon'
 
 export type Project = {
   id: string
-  avatar?: string
+  avatar?: string | null
   name: string
-  description?: string
+  description?: string | null
 }
 export const ProjectList: FC<{ projects: Project[] }> = (props) => (
   <section key="list" className="text-center">
@@ -22,7 +22,7 @@ export const ProjectList: FC<{ projects: Project[] }> = (props) => (
         >
           <ProjectIcon
             className="size-16 group-hover:shadow-out-sm group-hover:-translate-y-2 md:size-auto"
-            avatar={project.avatar}
+            avatar={project.avatar || undefined}
             name={project.name}
           />
           <span className="flex shrink-0 grow flex-col gap-2 text-left">

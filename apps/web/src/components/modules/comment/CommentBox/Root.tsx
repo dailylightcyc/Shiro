@@ -7,7 +7,9 @@ import { useSessionReader } from '~/atoms/hooks/reader'
 import { ErrorBoundary } from '~/components/common/ErrorBoundary'
 import { AutoResizeHeight } from '~/components/modules/shared/AutoResizeHeight'
 import { clsxm } from '~/lib/helper'
+import { useAggregationSelector } from '~/providers/root/aggregation-data-provider'
 
+import { useCanComment } from '../permissions'
 import type { CommentBaseProps } from '../types'
 import { CommentBoxAuthedInput } from './AuthedInput'
 import { CommentBoxLegacyForm } from './CommentBoxLegacyForm'
@@ -28,6 +30,10 @@ export const CommentBoxRoot: Component<CommentBaseProps> = (props) => {
   } = props
 
   const mode = useCommentMode()
+  const enabled = useCanComment()
+  const allowGuest =
+    useAggregationSelector((data) => data.commentOptions?.allowGuestComment) !==
+    false
 
   const isLogged = useIsOwnerLogged()
 
@@ -38,6 +44,8 @@ export const CommentBoxRoot: Component<CommentBaseProps> = (props) => {
       setCommentMode(CommentBoxMode['with-auth'])
     }
   }, [sessionReader])
+
+  if (!enabled) return null
 
   return (
     <ErrorBoundary>
@@ -57,7 +65,7 @@ export const CommentBoxRoot: Component<CommentBaseProps> = (props) => {
             <div className="relative w-full">
               {isLogged ? (
                 <CommentBoxLegacy autoFocus={autoFocus} />
-              ) : mode === CommentBoxMode.legacy ? (
+              ) : mode === CommentBoxMode.legacy && allowGuest ? (
                 <CommentBoxLegacy autoFocus={autoFocus} />
               ) : (
                 <CommentBoxWithAuth autoFocus={autoFocus} />

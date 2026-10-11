@@ -19,7 +19,7 @@ export default function Page() {
     queryKey: ['projects'],
     queryFn: async () => {
       const data = await apiClient.project.getAll()
-      return data.data
+      return data.$serialized
     },
   })
 

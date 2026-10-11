@@ -1,3 +1,5 @@
+'use client'
+
 import { useTranslations } from 'next-intl'
 import type { FC } from 'react'
 
@@ -6,14 +8,16 @@ import { LazyLoad } from '~/components/common/Lazyload'
 import { CommentBoxRoot } from './CommentBox/Root'
 import { Comments } from './Comments'
 import { CommentSkeleton } from './CommentSkeleton'
+import { useCanComment } from './permissions'
 import type { CommentBaseProps } from './types'
 
 export const CommentAreaRoot: FC<
   CommentBaseProps & {
-    allowComment: boolean
+    allowComment?: boolean
   }
 > = (props) => {
   const t = useTranslations('comment')
+  const enabled = useCanComment()
   // const header = headers()
   // const geo = header.get(REQUEST_GEO)
 
@@ -23,7 +27,7 @@ export const CommentAreaRoot: FC<
 
   const { allowComment, refId } = props
   // 兜下后端的数据，默认开
-  if (!allowComment && allowComment !== undefined) {
+  if (!enabled || allowComment === false) {
     return (
       <p className="mt-[7.1rem] text-center text-xl font-medium">
         {t('comments_closed')}

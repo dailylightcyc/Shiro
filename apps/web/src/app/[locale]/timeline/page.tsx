@@ -105,7 +105,7 @@ export default function TimelinePage() {
           type: nextType,
           year: +(year || 0) || undefined,
         })
-        .then((res) => res.data)
+        .then((res) => res.$serialized)
     },
   })
 
@@ -126,7 +126,7 @@ export default function TimelinePage() {
 
   if (!memory) {
     posts.forEach((post) => {
-      const date = new Date(post.created)
+      const date = new Date(post.createdAt)
       const year = date.getFullYear()
       const data: MapType = {
         title: post.title,
@@ -147,7 +147,7 @@ export default function TimelinePage() {
   notes
     .filter((n) => (memory ? n.bookmark : true))
     .forEach((note) => {
-      const date = new Date(note.created)
+      const date = new Date(note.createdAt)
       const year = date.getFullYear()
       const data: MapType = {
         title: note.title,

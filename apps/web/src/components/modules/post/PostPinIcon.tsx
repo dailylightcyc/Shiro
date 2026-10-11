@@ -13,7 +13,7 @@ export const PostPinIcon = ({ pin, id }: { pin: boolean; id: string }) => {
       onPinChange={async (nextPin) => {
         await apiClient.post.proxy(id).patch({
           data: {
-            pin: nextPin,
+            pinAt: nextPin ? new Date().toISOString() : null,
           },
         })
         setPinState(nextPin)

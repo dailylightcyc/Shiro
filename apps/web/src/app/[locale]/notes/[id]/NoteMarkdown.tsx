@@ -13,9 +13,9 @@ const NoteMarkdownRenderer = dynamic(() =>
 
 export const NoteMarkdown = () => {
   const contentFormat = useCurrentNoteDataSelector(
-    (data) => data?.data.contentFormat,
+    (data) => data?.contentFormat,
   )
-  const content = useCurrentNoteDataSelector((data) => data?.data.content)
+  const content = useCurrentNoteDataSelector((data) => data?.content)
 
   if (contentFormat === 'lexical' && content) {
     return <NoteLexicalRenderer />

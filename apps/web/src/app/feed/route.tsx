@@ -43,10 +43,10 @@ export async function GET() {
 
   const now = new Date()
   const custom_elements = get(
-    agg.$raw.theme as AppConfig,
+    agg.theme || {},
     'config.module.rss.custom_elements',
   )
-  const noRSS = get(agg.$raw.theme as AppConfig, 'config.module.rss.noRSS')
+  const noRSS = get(agg.theme || {}, 'config.module.rss.noRSS')
 
   const followChallengeIndex = custom_elements
     ? custom_elements.findIndex((item: any) => item.follow_challenge)

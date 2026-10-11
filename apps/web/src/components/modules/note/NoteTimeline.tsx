@@ -28,13 +28,13 @@ const animateUl: TargetAndTransition = {
 const NoteTimelineImpl = () => {
   const locale = useLocale()
   const note = useCurrentNoteDataSelector((data) => {
-    const note = data?.data
+    const note = data
     if (!note) return null
     return {
       id: note.id,
       nid: note.nid,
       title: note.title,
-      created: note.created,
+      createdAt: note.createdAt,
       isPublished: note.isPublished,
     }
   })
@@ -47,13 +47,12 @@ const NoteTimelineImpl = () => {
     queryFn: async ({ queryKey }) => {
       const [, noteId, lang] = queryKey
       if (!noteId) throw ''
-      const data = await apiClient.note.proxy.list(noteId).get<{
-        data: NoteTimelineItemData[]
-        size: number
-      }>({
-        params: { size: 10, lang },
-      })
-      return data.data
+      const data = await apiClient.note.proxy
+        .list(noteId)
+        .get<NoteTimelineItemData[]>({
+          params: { size: 10, lang },
+        })
+      return data
     },
     enabled: noteId !== undefined,
     placeholderData: keepPreviousData,
@@ -65,7 +64,7 @@ const NoteTimelineImpl = () => {
           title: note.title,
           nid: note.nid,
           id: note.id,
-          created: note.created,
+          createdAt: note.createdAt,
           isPublished: note.isPublished,
         },
       ]

@@ -30,6 +30,8 @@
   "submit_success": "Posted successfully!",
   "reply_success": "Thanks for your reply!",
   "comment_success": "Thanks for your comment!",
+  "moderation_pending": "Your comment was submitted and is awaiting review.",
+  "moderation_rejected": "Your comment did not pass moderation.",
   "sending": "Sending...",
   "send": "Send",
   "deleted_placeholder": "This comment has been deleted",

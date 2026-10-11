@@ -37,7 +37,7 @@ export const EquipmentPage = memo(() => {
   const t = useTranslations('common')
   const tPost = useTranslations('post')
   const text = useCurrentPageDataSelector((data) => data?.text)
-  const modified = useCurrentPageDataSelector((data) => data?.modified)
+  const modified = useCurrentPageDataSelector((data) => data?.modifiedAt)
 
   const equipmentData = useMemo(() => {
     if (!text) return null

@@ -6,11 +6,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { resolveRangeAnchor } from './anchor-resolve'
 import type { BlockInfo } from './anchor-utils'
+import { toCommentAnchor } from './api-anchor'
 import { CommentAnchorPopover } from './CommentAnchorPopover'
 import { useRichContentElement } from './RichContentElementContext'
-import type { CommentAnchor, RangeAnchor } from './types'
+import type { RangeAnchor } from './types'
 
-type CommentWithAnchor = CommentModel & { anchor?: CommentAnchor }
+type CommentWithAnchor = CommentModel
 
 function anchorKey(anchor: RangeAnchor): string {
   return `${anchor.blockId}:${anchor.startOffset}:${anchor.endOffset}`
@@ -19,7 +20,8 @@ function anchorKey(anchor: RangeAnchor): string {
 function collectRangeAnchors(comments: CommentWithAnchor[]): RangeAnchor[] {
   const result: RangeAnchor[] = []
   for (const c of comments) {
-    if (c.anchor?.mode === 'range') result.push(c.anchor)
+    const anchor = toCommentAnchor(c.anchor)
+    if (anchor?.mode === 'range') result.push(anchor)
   }
   return result
 }
@@ -32,7 +34,7 @@ function groupCommentsByRangeAnchor(
     { anchor: RangeAnchor; comments: CommentWithAnchor[] }
   >()
   for (const c of comments) {
-    const { anchor } = c
+    const anchor = toCommentAnchor(c.anchor)
     if (anchor?.mode !== 'range') continue
     const key = anchorKey(anchor)
     const existing = map.get(key)

@@ -1,6 +1,5 @@
 'use client'
 
-import type { AggregateRoot } from '@mx-space/api-client'
 import { atom, useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
 import type { FC, PropsWithChildren } from 'react'
@@ -9,6 +8,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { setWebUrl } from '~/atoms'
 import { useBeforeMounted } from '~/hooks/common/use-before-mounted'
 import { isDev } from '~/lib/env'
+import type { SiteAggregation as AggregateRoot } from '~/lib/fetch/aggregation'
 import { jotaiStore } from '~/lib/store'
 
 export type { AggregateRoot }

@@ -1,10 +1,6 @@
 'use client'
 
-import type {
-  NoteTopicListItem,
-  PaginateResult,
-  TopicModel,
-} from '@mx-space/api-client'
+import type { PaginateResult, TopicModel } from '@mx-space/api-client'
 import { useQuery } from '@tanstack/react-query'
 import { useLocale, useTranslations } from 'next-intl'
 import type { FC } from 'react'
@@ -19,6 +15,7 @@ import { useIsClient } from '~/hooks/common/use-is-client'
 import { Link } from '~/i18n/navigation'
 import { apiClient } from '~/lib/request'
 import { routeBuilder, Routes } from '~/lib/route-builder'
+import type { NoteTopicListItem } from '~/models/api'
 import { useCurrentNoteDataSelector } from '~/providers/note/CurrentNoteDataProvider'
 
 import { NoteTopicMarkdownRender } from './NoteTopicMarkdownRender'
@@ -38,7 +35,7 @@ export const NoteTopicDetail: FC<{ topic: TopicModel }> = (props) => {
           params: {
             page: 1,
             size: 1,
-            sortBy: 'created',
+            sortBy: 'createdAt',
             sortOrder: -1,
             lang: locale,
           },
@@ -67,7 +64,9 @@ export const NoteTopicDetail: FC<{ topic: TopicModel }> = (props) => {
       </Link>
 
       <div className="line-clamp-2 break-all text-neutral">
-        <NoteTopicMarkdownRender>{topic.introduce}</NoteTopicMarkdownRender>
+        <NoteTopicMarkdownRender>
+          {topic.introduce || ''}
+        </NoteTopicMarkdownRender>
       </div>
       {topic.description && (
         <>
@@ -100,7 +99,7 @@ export const NoteTopicDetail: FC<{ topic: TopicModel }> = (props) => {
               <span className="shrink-0">
                 （
                 <RelativeTime
-                  date={data?.data[0].modified || data?.data[0].created}
+                  date={data?.data[0].modifiedAt || data?.data[0].createdAt}
                   displayAbsoluteTimeAfterDay={Infinity}
                 />
                 ）
@@ -125,7 +124,7 @@ export const NoteTopicDetail: FC<{ topic: TopicModel }> = (props) => {
 }
 
 export const ToTopicLink: FC = () => {
-  const topic = useCurrentNoteDataSelector((data) => data?.data.topic)
+  const topic = useCurrentNoteDataSelector((data) => data?.topic)
   if (!topic) return null
   return (
     <Link

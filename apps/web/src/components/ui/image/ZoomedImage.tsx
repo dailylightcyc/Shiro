@@ -27,7 +27,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Blurhash } from 'react-blurhash'
 import { tv } from 'tailwind-variants'
 
 import { useIsMobile } from '~/atoms/hooks/viewport'
@@ -36,6 +35,7 @@ import { useIsUnMounted } from '~/hooks/common/use-is-unmounted'
 import { isDev, isServerSide } from '~/lib/env'
 import { clsxm } from '~/lib/helper'
 import { calculateDimensions } from '~/lib/image'
+import { thumbhashPlaceholder } from '~/lib/thumbhash'
 import { useMarkdownImageRecord } from '~/providers/article/MarkdownImageRecordProvider'
 
 import { Divider } from '../divider'
@@ -463,14 +463,12 @@ const Placeholder: FC<
         backgroundColor: accentColor,
       }}
     >
-      {imageMeta?.blurHash && (
-        <Blurhash
-          resolutionX={32}
-          resolutionY={32}
-          punch={1}
-          height={scaledSize.scaleHeight}
-          width={scaledSize.scaleWidth}
-          hash={imageMeta.blurHash}
+      {imageMeta?.thumbhash && (
+        <img
+          src={thumbhashPlaceholder(imageMeta.thumbhash)}
+          alt=""
+          aria-hidden
+          className="size-full"
         />
       )}
     </span>

@@ -28,7 +28,7 @@ export const NoteMetaBar = () => (
 )
 
 export const NoteMetaWeather = () => {
-  const weather = useCurrentNoteDataSelector((data) => data?.data.weather)
+  const weather = useCurrentNoteDataSelector((data) => data?.weather)
   const t = useTranslations('common')
   if (!weather) return null
   return (
@@ -43,7 +43,7 @@ export const NoteMetaWeather = () => {
 }
 
 export const NoteMetaMood = () => {
-  const mood = useCurrentNoteDataSelector((data) => data?.data.mood)
+  const mood = useCurrentNoteDataSelector((data) => data?.mood)
   const t = useTranslations('common')
 
   if (!mood) return null
@@ -59,7 +59,7 @@ export const NoteMetaMood = () => {
 }
 
 export const NoteMetaReadCount = () => {
-  const read = useCurrentNoteDataSelector((data) => data?.data.count.read)
+  const read = useCurrentNoteDataSelector((data) => data?.readCount)
   if (!read) return null
   return (
     <>
@@ -76,7 +76,7 @@ export const NoteMetaReadCount = () => {
 }
 
 export const NoteMetaLikeCount = () => {
-  const like = useCurrentNoteDataSelector((data) => data?.data.count.like)
+  const like = useCurrentNoteDataSelector((data) => data?.likeCount)
   if (!like) return null
   return (
     <>

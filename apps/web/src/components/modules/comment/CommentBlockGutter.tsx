@@ -10,11 +10,12 @@ import { PresentSheet } from '~/components/ui/sheet'
 import { resolveRangeAnchor } from './anchor-resolve'
 import type { BlockInfo } from './anchor-utils'
 import { buildBlockAnchorFromIndex } from './anchor-utils'
+import { toCommentAnchor } from './api-anchor'
 import { CommentBlockThread } from './CommentBlockThread'
 import { useRichContentElement } from './RichContentElementContext'
 import type { CommentAnchor } from './types'
 
-type CommentWithAnchor = CommentModel & { anchor?: CommentAnchor }
+type CommentWithAnchor = CommentModel
 
 interface CommentBlockGutterProps {
   blockInfos: BlockInfo[]
@@ -35,10 +36,13 @@ function AvatarStack({
     const seen = new Set<string>()
     const result: { avatar?: string; author: string }[] = []
     for (const c of comments) {
-      const key = c.avatar || c.author
+      const key = c.avatar || c.author || c.id
       if (!seen.has(key)) {
         seen.add(key)
-        result.push({ avatar: c.avatar, author: c.author })
+        result.push({
+          avatar: c.avatar || undefined,
+          author: c.author || 'Anonymous',
+        })
       }
     }
     return result.slice(0, 3)
@@ -182,7 +186,7 @@ export function CommentBlockGutter({
   const commentsByBlock = useMemo(() => {
     const map = new Map<string, CommentWithAnchor[]>()
     for (const c of comments) {
-      const { anchor } = c
+      const anchor = toCommentAnchor(c.anchor)
       if (!anchor?.blockId) continue
       const anchorLang = (anchor as CommentAnchor).lang ?? null
       const isBlock = anchor.mode === 'block'

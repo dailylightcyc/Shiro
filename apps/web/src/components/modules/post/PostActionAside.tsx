@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 
 import { useIsMobile } from '~/atoms/hooks/viewport'
 import { ThumbsupIcon } from '~/components/icons/thumbs-up'
+import { useCanComment } from '~/components/modules/comment/permissions'
 import { MotionButtonBase } from '~/components/ui/button'
 import { useModalStack } from '~/components/ui/modal'
 import { NumberSmoothTransition } from '~/components/ui/number-transition/NumberSmoothTransition'
@@ -69,11 +70,11 @@ const SubscribeButton = () => {
 }
 
 const PostAsideCommentButton = () => {
-  const { title, id, allowComment } =
+  const allowComment = useCanComment()
+  const { title, id } =
     useCurrentPostDataSelector((data) => ({
       title: data?.title,
       id: data?.id,
-      allowComment: data?.allowComment,
     })) || {}
   const isEof = useIsEoFWrappedElement()
   if (!id) return null
@@ -89,22 +90,24 @@ const LikeButton = () => {
   const [update] = useForceUpdate()
 
   const id = useCurrentPostDataSelector((data) => data?.id)
-  const likeCount = useCurrentPostDataSelector((data) => data?.count.like)
+  const likeCount = useCurrentPostDataSelector((data) => data?.likeCount)
+  const serverLiked = useCurrentPostDataSelector((data) => data?.isLiked)
 
   if (!id) return null
   const handleLike = () => {
-    if (isLikedBefore(id)) return
+    if (serverLiked || isLikedBefore(id)) return
 
     apiClient.activity.likeIt('Post', id).then(() => {
       setLikeId(id)
       setGlobalCurrentPostData((draft) => {
-        draft.count.like += 1
+        draft.likeCount += 1
+        draft.isLiked = true
       })
       update()
     })
   }
 
-  const isLiked = isLikedBefore(id)
+  const isLiked = serverLiked || isLikedBefore(id)
 
   return (
     <MotionButtonBase

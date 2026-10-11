@@ -1,5 +1,3 @@
-import type { AggregateRoot } from '@mx-space/api-client'
-import { simpleCamelcaseKeys } from '@mx-space/api-client'
 import RSS from 'rss'
 
 import { apiClient } from '~/lib/request'
@@ -9,14 +7,9 @@ export const revalidate = 86400 // 1 day
 
 export async function GET() {
   const [agg, says] = await Promise.all([
-    fetch(apiClient.aggregate.proxy.toString(true), {
-      next: {
-        revalidate: 86400,
-      },
-    }).then(
-      async (res) =>
-        simpleCamelcaseKeys(await res.json()) as Promise<AggregateRoot>,
-    ),
+    apiClient.aggregate.getAggregateData(undefined, {
+      next: { revalidate: 86400 },
+    }),
     apiClient.say.getAllPaginated(1, 20),
   ])
 
@@ -40,7 +33,7 @@ export async function GET() {
       url: `${agg.url.webUrl}/says`,
       author: `${say.source || say.author}`,
       guid: say.id,
-      date: say.created,
+      date: say.createdAt,
     })
   }
 

@@ -15,7 +15,7 @@ import { routeBuilder, Routes } from '~/lib/route-builder'
 
 type Post = {
   id: string
-  created: string // ISO datetime string
+  createdAt: string // ISO datetime string
   title: string
 }
 
@@ -51,7 +51,7 @@ function organizePostsByDate<T extends Post>(posts: T[]): DataByDate<T> {
 
   // Group posts by day
   posts.forEach((post) => {
-    const postDate = new Date(post.created)
+    const postDate = new Date(post.createdAt)
     const monthIndex = monthLabels.indexOf(
       `${postDate.getFullYear()}.${postDate.getMonth() + 1}`,
     )
@@ -183,7 +183,7 @@ export const HomePageTimeLine = () => {
                     {data[idx].length > 0 &&
                       data[idx].map((items, dayIdx) =>
                         items?.map((item, index) => {
-                          const created = new Date(item.created)
+                          const created = new Date(item.createdAt)
                           const dateInThisMonth = created.getDate()
                           const thisMonthTotalDays = new Date(
                             created.getFullYear(),

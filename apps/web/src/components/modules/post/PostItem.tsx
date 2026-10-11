@@ -1,4 +1,3 @@
-import type { PostListItem } from '@mx-space/api-client'
 import clsx from 'clsx'
 import { memo } from 'react'
 import RemoveMarkdown from 'remove-markdown'
@@ -7,6 +6,7 @@ import { useIsOwnerLogged } from '~/atoms/hooks/owner'
 import { PostPinIcon } from '~/components/modules/post/PostPinIcon'
 import { MagneticHoverEffect } from '~/components/ui/effect/MagneticHoverEffect'
 import { Link } from '~/i18n/navigation'
+import type { PostListItem } from '~/models/api'
 
 import { PostMetaBar } from './PostMetaBar'
 
@@ -15,7 +15,7 @@ export const PostLooseItem = memo<{ data: PostListItem }>(
     const text = data.text ?? ''
     const displayText =
       text.length > 300 ? `${RemoveMarkdown(text.slice(0, 300))}...` : text
-    const hasImage = data.images?.length > 0 && data.images[0].src
+    const hasImage = data.images?.[0]?.src
     const categorySlug = data.category?.slug
     const postLink = `/posts/${categorySlug}/${data.slug}`
 
@@ -30,13 +30,13 @@ export const PostLooseItem = memo<{ data: PostListItem }>(
           <div
             className={clsx(
               'flex items-baseline gap-2',
-              isLogged || data.pin ? 'w-[calc(100%-2rem)]' : 'w-full',
+              isLogged || data.pinAt ? 'w-[calc(100%-2rem)]' : 'w-full',
             )}
           >
             <span>{data.title}</span>
           </div>
 
-          <PostPinIcon pin={!!data.pin} id={data.id} />
+          <PostPinIcon pin={!!data.pinAt} id={data.id} />
         </h2>
         <div className="relative mt-8 space-y-2">
           {!!data.summary && (
@@ -88,13 +88,13 @@ export const PostCompactItem = memo<{ data: PostListItem }>(
           <div
             className={clsx(
               'flex items-baseline gap-2',
-              isLogged || data.pin ? 'w-[calc(100%-2rem)]' : 'w-full',
+              isLogged || data.pinAt ? 'w-[calc(100%-2rem)]' : 'w-full',
             )}
           >
             <span>{data.title}</span>
           </div>
 
-          <PostPinIcon pin={!!data.pin} id={data.id} />
+          <PostPinIcon pin={!!data.pinAt} id={data.id} />
         </h2>
         <div className="relative mt-4 space-y-2">
           <div className="relative overflow-hidden text-justify">

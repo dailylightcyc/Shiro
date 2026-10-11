@@ -27,9 +27,9 @@ interface Props extends LocaleParams {
   lang?: string
 }
 
-export const generateMetadata = async (
-  props: NextPageParams<{ locale: string }>,
-): Promise<Metadata> => {
+export const generateMetadata = async (props: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> => {
   const { locale } = await props.params
   const t = await getTranslations({
     namespace: 'common',
@@ -80,7 +80,9 @@ export default definePrerenderPage<Props>()({
         {currentPage > 1 ? (
           <PostPagination pagination={pagination} />
         ) : (
-          pagination.hasNextPage && <PostLoadMore pagination={pagination} />
+          pagination.page < pagination.totalPages && (
+            <PostLoadMore pagination={pagination} />
+          )
         )}
 
         <PostsSettingFab />

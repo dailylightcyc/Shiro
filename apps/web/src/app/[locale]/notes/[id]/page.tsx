@@ -1,10 +1,6 @@
 import './page.css'
 
-import type {
-  ModelWithLiked,
-  ModelWithTranslation,
-  NoteModel,
-} from '@mx-space/api-client'
+import type { NoteModel } from '@mx-space/api-client'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 
@@ -39,6 +35,7 @@ import {
   buildLocalePrefixedPath,
   getSupportedLocalesFromTranslations,
 } from '~/lib/seo/hreflang'
+import type { ModelWithLiked, ModelWithTranslation } from '~/models/api'
 import {
   CurrentNoteDataProvider,
   SyncNoteDataAfterLoggedIn,
@@ -151,7 +148,7 @@ export const generateMetadata = async (props: {
       lang: searchParams.lang,
     })
 
-    const { data } = res
+    const data = res
     const description = getSummaryFromMd(data.text ?? '')
 
     const ogUrl = await getOgUrl(
@@ -227,8 +224,8 @@ export default definePrerenderPage<NoteDetailPageParams>()<NoteDataResult>({
 
     return (
       <TocHeadingStrategyProvider
-        contentFormat={data.data.contentFormat}
-        hasContent={!!data.data.content}
+        contentFormat={data.contentFormat}
+        hasContent={!!data.content}
       >
         <CurrentNoteNidProvider nid={nid} />
         <CurrentNoteDataProvider data={data} />
@@ -237,15 +234,12 @@ export default definePrerenderPage<NoteDetailPageParams>()<NoteDataResult>({
         <Transition className="min-w-0" lcpOptimization>
           <Paper key={nid} as={NoteMainContainer}>
             <PageInner
-              data={data.data}
+              data={data}
               privateLoginOnlyMessage={t('private_login_only')}
             />
           </Paper>
           <BottomToUpSoftScaleTransitionView delay={500}>
-            <CommentAreaRootLazy
-              refId={data.data.id}
-              allowComment={data.data.allowComment}
-            />
+            <CommentAreaRootLazy refId={data.id} />
           </BottomToUpSoftScaleTransitionView>
         </Transition>
 

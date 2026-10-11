@@ -15,13 +15,29 @@ const makeComment = (
   overrides: Partial<CommentModel> = {},
 ): CommentModel => ({
   id,
-  created,
+  createdAt: created,
   refType: 'posts' as CollectionRefTypes,
-  ref: 'post-id',
+  refId: 'post-id',
   state: 1,
   author: `author-${id}`,
   text: `text-${id}`,
   avatar: '',
+  url: null,
+  ip: null,
+  agent: null,
+  pin: false,
+  parentCommentId: null,
+  rootCommentId: null,
+  replyCount: 0,
+  latestReplyAt: null,
+  isDeleted: false,
+  deletedAt: null,
+  isWhispers: false,
+  location: null,
+  authProvider: null,
+  readerId: null,
+  editedAt: null,
+  anchor: null,
   ...overrides,
 })
 
@@ -67,12 +83,12 @@ describe('comment thread helpers', () => {
   })
 
   it('merges loaded middle replies back into paginated thread data', () => {
-    const root: CommentThreadItem & { ref: string } = {
+    const root: CommentThreadItem & { refId: string } = {
       ...makeComment('root', '2026-03-14T10:00:00.000Z', {
         parentCommentId: null,
         rootCommentId: null,
       }),
-      ref: 'post-id',
+      refId: 'post-id',
       replies: [
         makeComment('child-1', '2026-03-14T10:01:00.000Z', {
           parentCommentId: 'root',
@@ -99,17 +115,15 @@ describe('comment thread helpers', () => {
         {
           data: [root],
           pagination: {
-            currentPage: 1,
-            totalPage: 1,
-            hasPrevPage: false,
-            hasNextPage: false,
+            page: 1,
+            totalPages: 1,
             size: 10,
             total: 1,
           },
         },
       ],
     } satisfies InfiniteData<
-      PaginateResult<CommentThreadItem & { ref: string }>
+      PaginateResult<CommentThreadItem & { refId: string }>
     >
 
     const next = mergeThreadRepliesIntoPages(data, {

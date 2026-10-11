@@ -35,7 +35,7 @@ export const PostTagsFAB = () => {
 const TagsModal = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['tags'],
-    queryFn: async () => (await apiClient.category.getAllTags()).data,
+    queryFn: async () => (await apiClient.category.getAllTags()).$serialized,
   })
 
   const { present } = useModalStack()
@@ -109,7 +109,7 @@ export const TagDetailModal = (props: { name: string }) => {
       {data
         .sort(
           (a, b) =>
-            new Date(b.created).getTime() - new Date(a.created).getTime(),
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         )
         .map((item) => (
           <li
@@ -123,7 +123,7 @@ export const TagDetailModal = (props: { name: string }) => {
                   month: '2-digit',
                   day: '2-digit',
                   year: '2-digit',
-                }).format(new Date(item.created))}
+                }).format(new Date(item.createdAt))}
               </span>
               <Link
                 onClick={() => {

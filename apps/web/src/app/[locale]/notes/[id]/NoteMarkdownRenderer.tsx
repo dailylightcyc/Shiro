@@ -14,7 +14,7 @@ const MarkdownRenderers: Partial<MarkdownToJSX.PartialRules> = {
 }
 
 export const NoteMarkdownRenderer = () => {
-  const text = useCurrentNoteDataSelector((data) => data?.data.text)
+  const text = useCurrentNoteDataSelector((data) => data?.text)
   if (!text) return null
   return (
     <MainMarkdown

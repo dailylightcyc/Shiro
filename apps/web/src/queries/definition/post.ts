@@ -1,10 +1,7 @@
-import type {
-  ModelWithLiked,
-  ModelWithTranslation,
-  PostModel,
-} from '@mx-space/api-client'
+import type { PostModel } from '@mx-space/api-client'
 
 import { apiClient } from '~/lib/request'
+import type { ModelWithLiked, ModelWithTranslation } from '~/models/api'
 
 import { defineQuery } from '../helper'
 

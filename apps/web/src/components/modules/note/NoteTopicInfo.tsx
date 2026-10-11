@@ -1,6 +1,6 @@
 'use client'
 
-import type { NoteTopicListItem, PaginateResult } from '@mx-space/api-client'
+import type { PaginateResult } from '@mx-space/api-client'
 import { useQuery } from '@tanstack/react-query'
 import { useLocale, useTranslations } from 'next-intl'
 import type { FC } from 'react'
@@ -9,6 +9,7 @@ import { memo, useMemo } from 'react'
 import { Divider } from '~/components/ui/divider'
 import { FloatPopover } from '~/components/ui/float-popover'
 import { apiClient } from '~/lib/request'
+import type { NoteTopicListItem } from '~/models/api'
 import { useCurrentNoteDataSelector } from '~/providers/note/CurrentNoteDataProvider'
 
 import { NoteTimelineItem } from './NoteTimelineItem'
@@ -16,7 +17,7 @@ import { NoteTopicDetail, ToTopicLink } from './NoteTopicDetail'
 
 export const NoteTopicInfo = memo(() => {
   const t = useTranslations('note')
-  const topic = useCurrentNoteDataSelector((data) => data?.data.topic)
+  const topic = useCurrentNoteDataSelector((data) => data?.topic)
 
   if (!topic) return null
 
@@ -47,7 +48,7 @@ const NoteTopicRank: FC<{
 }> = ({ topicId }) => {
   const t = useTranslations('note')
   const locale = useLocale()
-  const noteId = useCurrentNoteDataSelector((data) => data?.data.id)
+  const noteId = useCurrentNoteDataSelector((data) => data?.id)
   const { data: topicNotes } = useQuery({
     queryKey: [`topic-${topicId}`, locale],
     refetchOnMount: true,
@@ -58,7 +59,7 @@ const NoteTopicRank: FC<{
           params: {
             page: 1,
             size: 6,
-            sortBy: 'created',
+            sortBy: 'createdAt',
             sortOrder: -1,
             lang: locale,
           },

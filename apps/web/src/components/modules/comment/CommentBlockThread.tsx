@@ -11,7 +11,7 @@ import { ScrollArea } from '~/components/ui/scroll-area'
 import { CommentBoxRoot } from './CommentBox/Root'
 import type { CommentAnchor } from './types'
 
-type CommentWithAnchor = CommentModel & { anchor?: CommentAnchor }
+type CommentWithAnchor = CommentModel
 
 interface CommentBlockThreadProps {
   anchor: CommentAnchor
@@ -27,11 +27,11 @@ function ThreadComment({ comment }: { comment: CommentWithAnchor }) {
     <div className="flex gap-2 px-3 py-2">
       <Avatar
         className="shrink-0 rounded-full"
-        imageUrl={avatar}
+        imageUrl={avatar || undefined}
         radius="full"
         shadow={false}
         size={24}
-        text={author}
+        text={author || undefined}
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-1.5">
@@ -39,7 +39,7 @@ function ThreadComment({ comment }: { comment: CommentWithAnchor }) {
             {author}
           </span>
           <span className="text-[11px] text-muted-foreground">
-            <RelativeTime date={comment.created} />
+            <RelativeTime date={comment.createdAt} />
           </span>
         </div>
         {comment.anchor?.mode === 'range' && (

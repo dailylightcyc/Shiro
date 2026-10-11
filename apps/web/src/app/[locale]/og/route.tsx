@@ -123,7 +123,7 @@ export const GET = async (
       title: string
       subtitle: string
       meta: any
-      images: Image[] | undefined
+      images: Image[] | null | undefined
       id: string
     }
 
@@ -147,11 +147,11 @@ export const GET = async (
         document = await apiClient.note
           .getNoteByNid(+nid, { lang: locale })
           .then((r) => ({
-            title: r.data.title,
+            title: r.title,
             subtitle: messages.nav_notes,
-            meta: r.data.meta,
-            images: r.data.images,
-            id: r.data.id,
+            meta: r.meta,
+            images: r.images,
+            id: r.id,
           }))
         break
       }

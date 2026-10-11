@@ -109,8 +109,8 @@ export const ThinkingItem: FC<{
           </span>
 
           <span className="text-xs opacity-80 md:-translate-y-1 md:self-end">
-            <RelativeTime date={item.created} />
-            {item.modified && (
+            <RelativeTime date={item.createdAt} />
+            {item.modifiedAt && (
               <FloatPopover
                 mobileAsSheet
                 wrapperClassName="text-xs ml-1"
@@ -118,7 +118,7 @@ export const ThinkingItem: FC<{
                 type="tooltip"
                 triggerElement={t('edited')}
               >
-                {t('edited_at')} <RelativeTime date={item.modified} />
+                {t('edited_at')} <RelativeTime date={item.modifiedAt} />
               </FloatPopover>
             )}
           </span>

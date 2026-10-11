@@ -6,10 +6,10 @@ import { useEffect } from 'react'
 import { fetchAppUrl } from '~/atoms'
 import { setIsOwnerLogged } from '~/atoms/hooks/owner'
 import { setSessionReader } from '~/atoms/hooks/reader'
-import type { authClient } from '~/lib/authjs'
 import { apiClient } from '~/lib/request'
+import type { SessionReader } from '~/models/session'
 
-type AdapterUser = typeof authClient.$Infer.Session
+type AdapterUser = SessionReader & { role?: string }
 export const AuthSessionProvider: Component = ({ children }) => {
   const { data: session } = useQuery({
     queryKey: ['session'],
@@ -30,8 +30,8 @@ export const AuthSessionProvider: Component = ({ children }) => {
     const transformedData = simpleCamelcaseKeys(session)
 
     setSessionReader(transformedData)
+    setIsOwnerLogged(transformedData.role === 'owner')
     if (transformedData.role === 'owner') {
-      setIsOwnerLogged(true)
       fetchAppUrl()
     }
   }, [session])

@@ -3,12 +3,12 @@ import clsx from 'clsx'
 import Image from 'next/image'
 import type { FC } from 'react'
 import { memo, useRef } from 'react'
-import { Blurhash } from 'react-blurhash'
 import { PhotoProvider, PhotoView } from 'react-photo-view'
 
 import { LazyLoad } from '~/components/common/Lazyload'
 import { addImageUrlResizeQuery } from '~/lib/image'
 import { isVideoExt } from '~/lib/mine-type'
+import { thumbhashPlaceholder } from '~/lib/thumbhash'
 import { useMarkdownImageRecord } from '~/providers/article/MarkdownImageRecordProvider'
 import {
   useWrappedElementSize,
@@ -90,7 +90,7 @@ export const GridMarkdownImages: FC<{
 )
 
 const GridZoomImage: FC<{ src: string }> = memo(({ src }) => {
-  const { accent, height, width, blurHash } = useMarkdownImageRecord(src) || {}
+  const { accent, height, width, thumbhash } = useMarkdownImageRecord(src) || {}
   const cropUrl = addImageUrlResizeQuery(src, 600)
   const imageEl = useRef<HTMLImageElement>(null)
   const wGreaterThanH = width && height ? width > height : true
@@ -104,12 +104,12 @@ const GridZoomImage: FC<{ src: string }> = memo(({ src }) => {
         backgroundColor: accent,
       }}
     >
-      {!!blurHash && (
-        <Blurhash
-          hash={blurHash}
-          resolutionX={32}
-          resolutionY={32}
-          className="size-full!"
+      {!!thumbhash && (
+        <img
+          src={thumbhashPlaceholder(thumbhash)}
+          alt=""
+          aria-hidden
+          className="size-full"
         />
       )}
       <LazyLoad offset={30}>

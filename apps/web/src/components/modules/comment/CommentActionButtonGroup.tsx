@@ -40,7 +40,7 @@ export const CommentActionButtonGroup: FC<{
   )
   const createdAt = useCommentByIdSelector(
     commentId,
-    useCallback((comment) => comment?.created, []),
+    useCallback((comment) => comment?.createdAt, []),
   )
   const isDeleted = useCommentByIdSelector(
     commentId,

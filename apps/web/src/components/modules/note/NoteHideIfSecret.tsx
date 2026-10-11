@@ -12,9 +12,9 @@ export const NoteHideIfSecret: Component = ({ children }) => {
   const t = useTranslations('note')
   const tCommon = useTranslations('common')
   const locale = useLocale()
-  const noteSecret = useCurrentNoteDataSelector((data) => data?.data.publicAt)
+  const noteSecret = useCurrentNoteDataSelector((data) => data?.publicAt)
 
-  const noteId = useCurrentNoteDataSelector((data) => data?.data.nid)
+  const noteId = useCurrentNoteDataSelector((data) => data?.nid)
   const secretDate = useMemo(() => new Date(noteSecret!), [noteSecret])
   const isSecret = noteSecret
     ? isAfter(new Date(noteSecret), new Date())

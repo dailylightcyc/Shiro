@@ -112,7 +112,7 @@ export default definePrerenderPage<PageParams>()({
         <LayoutRightSideProvider className="absolute inset-y-0 right-0 hidden translate-x-full lg:block" />
       </div>
       <BottomToUpSoftScaleTransitionView delay={1000}>
-        <CommentAreaRootLazy refId={data.id} allowComment={data.allowComment} />
+        <CommentAreaRootLazy refId={data.id} />
       </BottomToUpSoftScaleTransitionView>
 
       <OnlyMobile>

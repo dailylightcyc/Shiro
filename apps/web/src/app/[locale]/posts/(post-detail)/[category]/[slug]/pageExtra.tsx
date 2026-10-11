@@ -10,6 +10,7 @@ import type { BlogPosting, WithContext } from 'schema-dts'
 import { appStaticConfig } from '~/app.static.config'
 import { useFocusReading } from '~/atoms/hooks/reading'
 import { withClientOnly } from '~/components/common/ClientOnly'
+import { useCanComment } from '~/components/modules/comment/permissions'
 import { PostMetaBar } from '~/components/modules/post/PostMetaBar'
 import { WithArticleSelectionAction } from '~/components/modules/shared/WithArticleSelectionAction'
 import { useRouter } from '~/i18n/navigation'
@@ -61,7 +62,7 @@ export const PostTitle = () => {
 export const MarkdownSelection: Component = (props) => {
   const id = useCurrentPostDataSelector((data) => data?.id)!
   const title = useCurrentPostDataSelector((data) => data?.title)!
-  const allowComment = useCurrentPostDataSelector((data) => data?.allowComment)!
+  const allowComment = useCanComment()
   return (
     <WithArticleSelectionAction
       refId={id}
@@ -92,18 +93,17 @@ export const PostMetaBarInternal: Component = ({ className }) => {
   const meta = useCurrentPostDataSelector((data) => {
     if (!data) return
     return {
-      created: data.created,
+      createdAt: data.createdAt,
       category: data.category,
       tags: data.tags,
-      count: data.count,
-      modified: data.modified,
+      readCount: data.readCount,
+      likeCount: data.likeCount,
+      modifiedAt: data.modifiedAt,
     }
   })
 
   if (!meta) return null
-  return (
-    <PostMetaBar meta={meta} className={className} />
-  )
+  return <PostMetaBar meta={meta} className={className} />
 }
 
 export const PostDataReValidate: FC<{

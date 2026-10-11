@@ -18,7 +18,7 @@ const PageAsideCommentButton = () => {
     useCurrentPageDataSelector((data) => ({
       title: data?.title,
       id: data?.id,
-      allowComment: data?.allowComment,
+      allowComment: true,
     })) || {}
   if (!id || !allowComment) return null
   return <AsideCommentButton refId={id} title={title!} />

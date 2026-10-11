@@ -30,7 +30,7 @@ export const PostLoadMore: FC<{ pagination: Pager }> = ({ pagination }) => {
       sortBy,
       orderBy,
       preferredLang,
-      initialPageParam.currentPage,
+      initialPageParam.page,
     ],
     queryFn: async ({ pageParam }) => {
       return await apiClient.post.getList(pageParam, 10, {
@@ -40,15 +40,15 @@ export const PostLoadMore: FC<{ pagination: Pager }> = ({ pagination }) => {
         lang: preferredLang,
       })
     },
-    initialPageParam: initialPageParam.currentPage + 1,
+    initialPageParam: initialPageParam.page + 1,
     getNextPageParam: (lastPage) =>
-      lastPage.pagination.hasNextPage
-        ? lastPage.pagination.currentPage + 1
+      lastPage.pagination.page < lastPage.pagination.totalPages
+        ? lastPage.pagination.page + 1
         : undefined,
-    enabled: !!initialPageParam.hasNextPage,
+    enabled: !!(initialPageParam.page < initialPageParam.totalPages),
   })
 
-  if (isLoading && initialPageParam.hasNextPage) {
+  if (isLoading && initialPageParam.page < initialPageParam.totalPages) {
     return <Loading useDefaultLoadingText />
   }
 

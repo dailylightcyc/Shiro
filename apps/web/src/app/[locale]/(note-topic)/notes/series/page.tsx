@@ -9,7 +9,7 @@ import { definePrerenderPage } from '~/lib/request.server'
 import { routeBuilder, Routes } from '~/lib/route-builder'
 
 export default definePrerenderPage()({
-  fetcher: async () => (await apiClient.topic.getAll()).data,
+  fetcher: async () => (await apiClient.topic.getAll()).$serialized,
   Component: ({ data }) => (
     <BottomToUpSoftScaleTransitionView>
       <header className="prose">
@@ -19,7 +19,7 @@ export default definePrerenderPage()({
       <main className="mt-10 text-zinc-950/80 dark:text-zinc-50/80">
         <TimelineList>
           {data.map((item, i) => {
-            const date = new Date(item.created)
+            const date = new Date(item.createdAt)
 
             return (
               <BottomToUpTransitionView

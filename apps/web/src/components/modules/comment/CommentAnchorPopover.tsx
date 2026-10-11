@@ -15,11 +15,9 @@ import { RootPortal } from '~/components/ui/portal'
 import useClickAway from '~/hooks/common/use-click-away'
 
 import { CommentBlockThread } from './CommentBlockThread'
-import type { CommentAnchor, RangeAnchor } from './types'
+import type { RangeAnchor } from './types'
 
-type CommentWithAnchor = import('@mx-space/api-client').CommentModel & {
-  anchor?: CommentAnchor
-}
+type CommentWithAnchor = import('@mx-space/api-client').CommentModel
 
 export function CommentAnchorPopover({
   refId,

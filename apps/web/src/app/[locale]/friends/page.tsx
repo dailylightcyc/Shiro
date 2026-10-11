@@ -34,7 +34,7 @@ export default function Page() {
   const { data, isLoading } = useQuery({
     queryKey: ['friends'],
     queryFn: async () => {
-      const { data } = await apiClient.link.getAll()
+      const data = await apiClient.link.getAll()
       return data
     },
     select: useCallback((data: LinkModel[]) => {
@@ -154,7 +154,7 @@ const Card: FC<{ link: LinkModel }> = ({ link }) => {
     >
       <Avatar
         randomColor
-        imageUrl={link.avatar}
+        imageUrl={link.avatar || undefined}
         lazy
         radius={8}
         text={link.name[0]}

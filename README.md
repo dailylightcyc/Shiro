@@ -5,7 +5,7 @@
 >
 > 如果你正在寻找一个全新的个人博客前端，请关注 **[余白 / Yohaku](https://github.com/Innei/Yohaku)** — 一个独立的新项目，拥有全新的设计语言与视觉体系。完整代码需 [赞助](https://github.com/sponsors/Innei) 获取访问权限。
 >
-> **Shiro 要求 Mix Space Core 版本 == 10.x**，不兼容更高版本。
+> 此分支已适配 **MX-CMS Core 12+（API v3）**，使用 `@mx-space/api-client@5.13.0`；运行环境要求 Node.js 22+。
 
 一个极简主义的个人网站主题，如纸的纯净，似雪的清新。
 
@@ -46,6 +46,22 @@
 - **TailwindCSS v4** - 原子化 CSS 框架
 - **DaisyUI v5** - 组件库
 - **TanStack Query** - 服务端状态管理
+
+## MX-CMS API 配置
+
+开发模式的 Core 路由不带版本前缀，`NEXT_PUBLIC_API_URL` 设置为 `http://localhost:2333`。
+生产模式设置为 `https://你的域名/api/v3`；浏览器使用其他 API 地址时设置 `NEXT_PUBLIC_CLIENT_API_URL`。
+`NEXT_PUBLIC_GATEWAY_URL` 指向 WebSocket 服务源地址，不包含 `/api/v3`。
+可参考 [环境变量模板](apps/web/.env.template)。
+
+Shiro 消费 CMS 的 `{ data, meta }` 响应，使用 `createdAt`、`modifiedAt`、`readCount`、`likeCount`
+以及 `pagination.page/totalPages`。资源 ID 和评论游标始终保留为字符串。
+文章翻译、点赞状态和链接 enrichment 从响应 meta 提取后进入页面缓存。
+搜索使用 CMS 内置搜索，评论分别调用访客、读者和站长回复接口。
+
+开发和生产构建默认使用 Webpack，以兼容富文本依赖的 CSS Highlight 样式。
+验证命令：`pnpm --filter @shiro/web test`、`pnpm --filter @shiro/web typecheck`
+和 `pnpm --filter @shiro/web build:ci`。
 
 ## 📖 部署指南
 

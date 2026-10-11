@@ -61,12 +61,12 @@ export const SayModalForm: FC<{
       <FormInput
         name="source"
         placeholder={editingData?.source || t('source')}
-        defaultValue={editingData?.source}
+        defaultValue={editingData?.source || undefined}
       />
       <FormInput
         name="author"
         placeholder={editingData?.author || t('author')}
-        defaultValue={editingData?.author}
+        defaultValue={editingData?.author || undefined}
       />
 
       <div className="flex justify-end">

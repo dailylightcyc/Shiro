@@ -47,7 +47,7 @@ export const CommentProvider: FC<{
   refId: string
   children: (
     data: InfiniteData<
-      PaginateResult<CommentModel & { ref: string }> & {
+      PaginateResult<CommentModel & { refId: string }> & {
         readers: Record<string, ReaderModel>
       }
     >,

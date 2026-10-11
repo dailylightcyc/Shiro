@@ -7,10 +7,7 @@ import type {
 } from '@mx-space/api-client'
 import type { InfiniteData } from '@tanstack/react-query'
 
-import type { CommentAnchor } from './types'
-
 export type CommentWithAnchor = CommentModel & {
-  anchor?: CommentAnchor
   new?: boolean
 }
 
@@ -21,7 +18,7 @@ export type CommentThreadViewItem = CommentWithAnchor & {
 }
 
 export type CommentThreadPage = PaginateResult<
-  CommentThreadItem & { ref: string }
+  CommentThreadItem & { refId: string }
 >
 export type CommentThreadInfiniteData = InfiniteData<
   CommentThreadPage & {
@@ -32,9 +29,9 @@ export type CommentThreadInfiniteData = InfiniteData<
 const toTimestamp = (date: string) => new Date(date).getTime()
 
 const byCreatedAsc = (
-  a: Pick<CommentModel, 'created'>,
-  b: Pick<CommentModel, 'created'>,
-) => toTimestamp(a.created) - toTimestamp(b.created)
+  a: Pick<CommentModel, 'createdAt'>,
+  b: Pick<CommentModel, 'createdAt'>,
+) => toTimestamp(a.createdAt) - toTimestamp(b.createdAt)
 
 const getParentCommentId = (
   parentCommentId: CommentModel['parentCommentId'],
@@ -59,7 +56,7 @@ const sortChildrenDeep = (comment: CommentThreadViewItem) => {
 }
 
 export const buildCommentTreeItem = (
-  rootComment: CommentThreadItem | (CommentThreadViewItem & { ref?: string }),
+  rootComment: CommentThreadItem | (CommentThreadViewItem & { refId?: string }),
 ): CommentThreadViewItem => {
   const rootView = createViewComment(rootComment)
   const replyViews = (rootComment.replies ?? []).map((reply) =>
@@ -88,7 +85,7 @@ export const buildCommentTreeItem = (
 
 export const flattenThreadComments = (
   comments: Array<
-    CommentThreadItem | (CommentThreadViewItem & { ref?: string })
+    CommentThreadItem | (CommentThreadViewItem & { refId?: string })
   >,
 ): CommentWithAnchor[] => {
   const result: CommentWithAnchor[] = []

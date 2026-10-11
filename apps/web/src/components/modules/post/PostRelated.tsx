@@ -1,8 +1,11 @@
 'use client'
 
+import type { PostRelatedSummary } from '@mx-space/api-client'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import type { FC } from 'react'
 
+import { apiClient } from '~/lib/request'
 import { useCurrentPostDataSelector } from '~/providers/post/CurrentPostDataProvider'
 
 import { PeekLink } from '../peek/PeekLink'
@@ -28,16 +31,35 @@ export const PostRelated: FC<{
       </h3>
       <ul className="ml-0 mt-4 list-inside list-disc pl-0 text-base leading-relaxed">
         {related.map((post) => {
-          const href = `/posts/${post.category.slug}/${post.slug}`
-          return (
-            <li key={href}>
-              <PeekLink href={href} className="shiro-link--underline">
-                {post.title}
-              </PeekLink>
-            </li>
-          )
+          const href = post.category
+            ? `/posts/${post.category.slug}/${post.slug}`
+            : undefined
+          return <RelatedPostLink key={post.id} post={post} href={href} />
         })}
       </ul>
     </div>
+  )
+}
+
+function RelatedPostLink({
+  post,
+  href,
+}: {
+  post: PostRelatedSummary
+  href?: string
+}) {
+  const { data } = useQuery({
+    queryKey: ['post-url', post.id],
+    enabled: !href && !!post.slug,
+    queryFn: () => apiClient.post.getFullUrl(post.slug),
+  })
+  const path = href || (data?.path ? `/posts${data.path}` : undefined)
+  if (!path) return null
+  return (
+    <li>
+      <PeekLink href={path} className="shiro-link--underline">
+        {post.title}
+      </PeekLink>
+    </li>
   )
 }

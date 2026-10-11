@@ -1,7 +1,7 @@
 'use client'
 
 import type {
-  CommentDto,
+  AnonymousCommentDto,
   CommentModel,
   RequestError,
 } from '@mx-space/api-client'
@@ -14,6 +14,7 @@ import type { PropsWithChildren } from 'react'
 import { use, useCallback } from 'react'
 
 import { useIsOwnerLogged } from '~/atoms/hooks/owner'
+import { useSessionReader } from '~/atoms/hooks/reader'
 import { apiClient } from '~/lib/request'
 import { getErrorMessageFromRequestError } from '~/lib/request.shared'
 import { jotaiStore } from '~/lib/store'
@@ -116,7 +117,6 @@ export const useSendComment = () => {
     mail: mailAtom,
     url: urlAtom,
 
-    source: sourceAtom,
     avatar: avatarAtom,
 
     anchor: anchorAtom,
@@ -126,13 +126,18 @@ export const useSendComment = () => {
   } = useGetCommentBoxAtomValues()
   const { afterSubmit } = useCommentBoxLifeCycle()
   const isLogged = useIsOwnerLogged()
+  const reader = useSessionReader()
   const queryClient = useQueryClient()
   const isReply = useUseCommentReply()
   const originalRefId = useCommentOriginalRefId()
   const completedCallback = useCommentCompletedCallback()
 
   const wrappedCompletedCallback = <T extends CommentModel>(data: T): T => {
-    completedCallback?.(data)
+    if (
+      data.moderation?.status !== 'pending' &&
+      data.moderation?.status !== 'rejected'
+    )
+      completedCallback?.(data)
     return data
   }
 
@@ -142,87 +147,48 @@ export const useSendComment = () => {
       const author = jotaiStore.get(authorAtom)
       const mail = jotaiStore.get(mailAtom)
       const avatar = jotaiStore.get(avatarAtom)
-      const source = jotaiStore.get(sourceAtom) as any
       const url = jotaiStore.get(urlAtom)
       const anchor = jotaiStore.get(anchorAtom)
-
-      const commentDto: CommentDto & { anchor?: CommentAnchor } = {
+      const isWhispers = jotaiStore.get(isWhisperAtom)
+      const syncToRecently = jotaiStore.get(syncToRecentlyAtom)
+      const readerDto = {
         text,
+        isWhispers,
+        ...(!isReply && anchor ? { anchor } : {}),
+      }
+      const guestDto: AnonymousCommentDto & { anchor?: CommentAnchor } = {
+        ...readerDto,
         author,
         mail,
-        avatar,
-        source,
-        url,
-      }
-      if (anchor) commentDto.anchor = anchor
-
-      if (isLogged) {
-        delete commentDto.avatar
+        ...(avatar ? { avatar } : {}),
+        ...(url ? { url } : {}),
       }
 
-      // Omit empty string key
-      Object.keys(commentDto).forEach((key) => {
-        // @ts-expect-error
-        if (commentDto[key] === '') delete commentDto[key]
-      })
+      const result = isReply
+        ? isLogged
+          ? await apiClient.comment
+              .proxy('owner-reply')(refId)
+              .post<CommentModel>({ data: readerDto })
+          : reader
+            ? await apiClient.comment.readerReply(refId, readerDto)
+            : await apiClient.comment.guestReply(refId, guestDto)
+        : isLogged || reader
+          ? await apiClient.comment.readerComment(refId, readerDto)
+          : await apiClient.comment.guestComment(refId, guestDto)
 
-      // Reply Comment
-      if (isReply) {
-        if (isLogged) {
-          return apiClient.comment.proxy.owner
-            .reply(refId)
-            .post<CommentModel>({
-              data: {
-                text,
-                source,
-              },
-            })
-            .then(wrappedCompletedCallback)
-        } else {
-          return apiClient.comment
-            .reply(refId, commentDto)
-            .then(wrappedCompletedCallback)
-        }
+      if (isLogged && !isReply && syncToRecently) {
+        await apiClient.recently.proxy.post({
+          data: { content: text, ref: refId },
+        })
+        toast.success(t('synced_to_thinking'))
       }
-
-      // Normal Comment
-      const isWhisper = jotaiStore.get(isWhisperAtom)
-      const syncToRecently = jotaiStore.get(syncToRecentlyAtom)
-
-      if (isLogged) {
-        return apiClient.comment.proxy.owner
-          .comment(refId)
-          .post<CommentModel>({
-            data: { text, source, ...(anchor ? { anchor } : {}) },
-          })
-          .then(async (res) => {
-            if (syncToRecently)
-              apiClient.recently.proxy
-                .post({
-                  data: {
-                    content: text,
-                    ref: refId,
-                  },
-                })
-                .then(() => {
-                  toast.success(t('synced_to_thinking'))
-                })
-
-            return res
-          })
-          .then(wrappedCompletedCallback)
-      }
-      // @ts-ignore
-      commentDto.isWhispers = isWhisper
-      return apiClient.comment
-        .comment(refId, commentDto)
-        .then(wrappedCompletedCallback)
+      return wrappedCompletedCallback(result)
     },
     mutationKey: [commentRefId, 'comment'],
     onError(error: RequestError) {
       toast.error(getErrorMessageFromRequestError(error))
     },
-    onSuccess() {
+    onSuccess(result) {
       afterSubmit?.()
 
       const toastCopy = isLogged
@@ -233,7 +199,15 @@ export const useSendComment = () => {
 
       const commentListQueryKey = buildCommentsQueryKey(originalRefId)
 
-      toast.success(toastCopy)
+      if (result.moderation?.status === 'rejected') {
+        toast.error(t('moderation_rejected'))
+      } else {
+        toast.success(
+          result.moderation?.status === 'pending'
+            ? t('moderation_pending')
+            : toastCopy,
+        )
+      }
       jotaiStore.set(textAtom, '')
       jotaiStore.set(anchorAtom, null)
       queryClient.invalidateQueries({

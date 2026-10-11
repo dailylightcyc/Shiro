@@ -34,7 +34,7 @@ export const ActivityRecent = () => {
         })
         .sort(
           (a, b) =>
-            new Date(b.created).getTime() - new Date(a.created).getTime(),
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         ) as ReactActivityType[],
     // .slice(0, 6) as ReactActivityType[]
     [data],
@@ -79,7 +79,7 @@ export const ActivityRecent = () => {
           <ul className="shiro-timeline mt-4 flex flex-col pb-8 pl-2">
             {flatData.map((activity) => (
               <li
-                key={`${activity.bizType}-${activity.id}-${activity.created}`}
+                key={`${activity.bizType}-${activity.id}-${activity.createdAt}`}
                 className="flex min-w-0 justify-between"
               >
                 <ActivityCard activity={activity} />

@@ -35,7 +35,7 @@ export const noteCreateHandler: EventHandler = (data) => {
 
 export const noteUpdateHandler: EventHandler = (data) => {
   const note = data as NoteModel
-  const currentData = getCurrentNoteData()?.data
+  const currentData = getCurrentNoteData()
 
   if (!currentData) return
   if (currentData.id !== note.id) return
@@ -54,7 +54,7 @@ export const noteUpdateHandler: EventHandler = (data) => {
   }
 
   setCurrentNoteData((draft) => {
-    Object.assign(draft.data, note)
+    Object.assign(draft, note)
   })
   toast.info(updateMessage)
   trackerRealtimeEvent()
@@ -73,7 +73,7 @@ export const noteDeleteHandler: EventHandler = (data, { router }) => {
       routeBuilder(Routes.Note, {
         id: note.id,
       }) &&
-    getCurrentNoteData()?.data.id === note.id
+    getCurrentNoteData()?.id === note.id
   ) {
     router.replace(routeBuilder(Routes.PageDeletd, {}))
     toast.error('手记已删除')

@@ -119,7 +119,7 @@ const Item = memo<{
         <div className="flex flex-wrap text-sm text-base-content/60 md:justify-between">
           <div className="mb-2 w-full md:mb-0 md:w-auto">
             <span className="mr-2">{tCommon('published_at')}</span>
-            <RelativeTime date={say.created} />
+            <RelativeTime date={say.createdAt} />
           </div>
           <div className="w-full text-right md:ml-auto md:w-auto">
             <div>

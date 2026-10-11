@@ -6,6 +6,7 @@ import type { PropsWithChildren } from 'react'
 import { Fragment, useMemo } from 'react'
 
 import { useFocusReading } from '~/atoms/hooks/reading'
+import { useCanComment } from '~/components/modules/comment/permissions'
 import { GoToAdminEditingButton } from '~/components/modules/shared/GoToAdminEditingButton'
 import { WithArticleSelectionAction } from '~/components/modules/shared/WithArticleSelectionAction'
 import { Link } from '~/i18n/navigation'
@@ -116,7 +117,7 @@ export const PagePaginator = () => {
 export const MarkdownSelection: Component = (props) => {
   const id = useCurrentPageDataSelector((data) => data?.id)!
   const title = useCurrentPageDataSelector((data) => data?.title)!
-  const canComment = useCurrentPageDataSelector((data) => data?.allowComment)!
+  const canComment = useCanComment()
   return (
     <WithArticleSelectionAction
       refId={id}

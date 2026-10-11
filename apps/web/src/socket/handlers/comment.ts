@@ -9,14 +9,14 @@ import type { EventHandler } from './types'
 
 export const commentCreateHandler: EventHandler = (data) => {
   const payload = data as {
-    ref: string
+    refId: string
     id: string
   }
 
   setTimeout(() => {
     const queryData = queryClient.getQueryData<
       InfiniteData<PaginateResult<CommentModel>>
-    >(buildCommentsQueryKey(payload.ref))
+    >(buildCommentsQueryKey(payload.refId))
 
     if (!queryData) return
     for (const page of queryData.pages) {
@@ -26,7 +26,7 @@ export const commentCreateHandler: EventHandler = (data) => {
     }
 
     queryClient.invalidateQueries({
-      queryKey: buildCommentsQueryKey(payload.ref),
+      queryKey: buildCommentsQueryKey(payload.refId),
     })
   }, 1000)
 }

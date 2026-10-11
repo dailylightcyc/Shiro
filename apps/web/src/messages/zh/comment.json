@@ -30,6 +30,8 @@
   "submit_success": "发表成功啦~",
   "reply_success": "感谢你的回复！",
   "comment_success": "感谢你的评论！",
+  "moderation_pending": "评论已提交，等待审核",
+  "moderation_rejected": "评论未通过审核",
   "sending": "送信...",
   "send": "送信",
   "deleted_placeholder": "该评论已删除",

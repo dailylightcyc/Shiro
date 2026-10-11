@@ -14,7 +14,7 @@ export const NoteFooterNavigation = () => {
       : {
           nextNid: data.next?.nid,
           prevNid: data.prev?.nid,
-          currentObjectId: data.data.id,
+          currentObjectId: data.id,
         },
   )
 

@@ -1,6 +1,5 @@
-import type { NoteWrappedWithLikedAndTranslationPayload } from '@mx-space/api-client'
-
 import { apiClient } from '~/lib/request'
+import type { NoteWithTranslation } from '~/models/api'
 
 import { defineQuery } from '../helper'
 
@@ -8,13 +7,26 @@ const LATEST_KEY = 'latest'
 export const note = {
   byNid: (nid: string, password?: string | null, lang?: string) =>
     defineQuery({
-      queryKey: ['note', nid, lang],
+      queryKey: ['note', nid, lang, password],
 
       queryFn: async ({ queryKey }) => {
-        const [, id, lang] = queryKey as [string, string, string | undefined]
+        const [, id, lang, password] = queryKey as [
+          string,
+          string,
+          string | undefined,
+          string | null | undefined,
+        ]
 
         if (id === LATEST_KEY) {
-          return (await apiClient.note.getLatest()).$serialized
+          const data =
+            await apiClient.note.proxy.latest.get<NoteWithTranslation>({
+              params: {
+                password: password || undefined,
+                lang,
+                prefer: 'lexical',
+              },
+            })
+          return data.$serialized
         }
         const data = await apiClient.note.getNoteByNid(Number(id), {
           password: password || undefined,
@@ -22,7 +34,7 @@ export const note = {
           prefer: 'lexical',
         })
 
-        return data.$serialized as NoteWrappedWithLikedAndTranslationPayload
+        return data.$serialized as NoteWithTranslation
       },
     }),
 }

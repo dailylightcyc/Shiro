@@ -41,7 +41,7 @@ export const ActivityPostList = () => {
 
             <span className="ml-2 shrink-0 self-end text-xs opacity-70">
               <RelativeTime
-                date={post.created}
+                date={post.createdAt}
                 displayAbsoluteTimeAfterDay={180}
               />
             </span>
@@ -76,7 +76,7 @@ export const ActivityPostList = () => {
 
             <span className="ml-2 shrink-0 self-end text-xs opacity-70">
               <RelativeTime
-                date={note.created}
+                date={note.createdAt}
                 displayAbsoluteTimeAfterDay={180}
               />
             </span>
