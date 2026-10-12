@@ -1,12 +1,7 @@
 name: 'Next.js Bundle Analysis'
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main # change this if your default branch is named differently
-      - master
-      - dev
+  # Kept as an optional upstream analysis tool; build.yml owns automatic builds.
   workflow_dispatch:
 
 defaults:

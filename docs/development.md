@@ -44,23 +44,25 @@ docker compose --project-name shiro-dev --env-file .env.development.local -f com
 | 模式            | 进程树预算 | V8 堆上限 |
 | --------------- | ---------- | --------- |
 | 开发            | 3072 MiB   | 512 MiB   |
-| 生产构建        | 3072 MiB   | 640 MiB   |
+| 生产构建        | 2048 MiB   | 1408 MiB  |
 | 类型检查 / lint | 1536 MiB   | 768 MiB   |
 
-Linux systemd 用户会话可用时，启动器通过 cgroup 限制整个任务的内存、禁止任务使用交换分区，并限制为最多两个 CPU 的份额。没有 systemd 的 Linux 使用每秒一次的进程树 RSS 监控，超出预算时终止该任务；这种采样方式可能出现短暂越限。Windows/macOS 使用 V8 堆限制和编译互斥，不提供 Linux 的 RSS/cgroup 限制。
+Linux systemd 用户会话可用时，启动器通过 cgroup 限制整个任务的内存、禁止任务使用交换分区，并限制为最多两个 CPU 的份额。cgroup 使用量每 100 ms 检查一次，进程树 RSS 每秒采样一次。没有 systemd 的 Linux 使用进程树 RSS 监控，超出预算时终止该任务；这种采样方式可能出现短暂越限。设置 `SHIRO_REQUIRE_CGROUP=1` 会拒绝没有对应硬限制及 Swap 禁用的环境。Windows/macOS 使用 V8 堆限制和编译互斥，不提供 Linux 的 RSS/cgroup 限制。
 
 构建分四批执行，各批使用独立进程，完成后释放内存：
 
 1. 准备富文本样式、Shiki 语言语法与 Mermaid 浏览器资源。
 2. 使用 Rolldown 单独预打包 Excalidraw 白板及其图表依赖。按锁文件和打包脚本生成指纹，依赖没有变化时复用本地结果；文章使用白板时加载本地浏览器模块，复用应用的 React 实例。
 3. 单线程检查 TypeScript 类型。
-4. 以一个 Rust 编译线程整合 Next.js 路由和 standalone 产物。
+4. 以低并行度 Webpack 整合 Next.js 路由和 standalone 产物。
 
 Next.js 路由在最后一批统一生成；它们共享路由清单和服务端运行时，不能把多个独立 `.next` 输出直接拼接成同一个站点。大依赖提前分批处理，避免进入这一步的编译依赖图。之后 Docker 只复制成品。`pnpm vendors` 可单独执行资源预打包。
 
 启动器监控整个 cgroup 的内存，包含原生分配和计入任务的文件缓存，并预留 128 MiB 停止余量。发生内核 OOM 时返回失败码，避免 Next CLI 的零退出码把失败误报为成功。
 
-开发和生产构建默认使用 Turbopack。开发支持热更新与 React Fast Refresh，启用开发磁盘缓存和缓存回收，开发代码不压缩以保留 Fast Refresh 状态；构建使用一个 Rust 编译线程和一个页面生成 worker。代码检查插件已移除。首次部署的跳转在 proxy 阶段完成，进入引导页前无需编译整个博客首页。生产源码也在主机通过预算启动器串行构建。Dockerfile 只复制 standalone、静态文件和公开资源，容器启动时不安装前端依赖、不编译源码。
+开发默认使用 Turbopack，生产默认使用 Webpack。开发支持热更新与 React Fast Refresh，启用开发磁盘缓存和缓存回收，开发代码不压缩以保留 Fast Refresh 状态；构建禁用 Webpack 缓存并使用一个页面生成 worker。代码检查插件已移除。首次部署的跳转在 proxy 阶段完成，进入引导页前无需编译整个博客首页。生产源码也在主机通过预算启动器串行构建。Dockerfile 只复制 standalone、静态文件和公开资源，容器启动时不安装前端依赖、不编译源码。
+
+完整冷构建实测峰值为 1832 MiB，已配置 [GitHub Actions 2 GiB 构建与成品下载](build-memory.md)。保留 Next.js 的 SSR、路由及 CMS API 对接。若手动选择 Turbopack 生产构建，需同时提供其内存预算，例如 `SHIRO_BUNDLER=turbopack SHIRO_MEMORY_MB=3072 SHIRO_HEAP_MB=640 pnpm build`。
 
 富文本使用 CMS 配套的 `@haklex/*` 0.46.4 独立静态模块与 Lexical 0.52，移除了会带入编辑器插件的整合包。富文本渲染槽、评论编辑器和代码高亮按需加载。富文本 CSS、Shiki 语言语法和 Mermaid 使用包提供的预编译浏览器资源，通过本地静态目录加载，保留全部 Shiki 语言支持，避免重复解析和压缩大型依赖。这些资源由启动器自动生成，不提交、不依赖公共 CDN。
 

@@ -1,5 +1,11 @@
 import type { BusinessEvents, EventPayloadMapping } from '@mx-space/webhook'
 
+// Keep the webhook's Node-only signature verifier out of browser bundles while
+// deriving event names and payloads from the CMS protocol types.
+type ClientEventPayloads = {
+  [T in keyof EventPayloadMapping as `${T}`]: EventPayloadMapping[T]
+}
+
 export const buildSocketEventType = (type: string) =>
   `ws_event:${type}` as const
 
@@ -11,11 +17,9 @@ export class WsEvent extends Event {
     super(buildSocketEventType(type))
   }
 
-  static on<T extends BusinessEvents>(
+  static on<T extends keyof ClientEventPayloads>(
     type: T,
-    cb: (
-      data: EventPayloadMapping[Extract<T, keyof EventPayloadMapping>],
-    ) => void,
+    cb: (data: ClientEventPayloads[T]) => void,
   ) {
     const _cb = (e: any) => {
       cb(e.data)

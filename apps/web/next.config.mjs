@@ -136,14 +136,41 @@ let nextConfig = {
     config.resolve.alias['@excalidraw/excalidraw/index.css$'] = fileURLToPath(
       new URL('./src/lib/excalidraw-style-vendor.ts', import.meta.url),
     )
+    // next/dynamic also resolves the import for SSR; this ESM-only package has
+    // no require export. Resolve its published entry without changing subpaths.
+    for (const specifier of [
+      '@haklex/rich-editor-ui',
+      '@haklex/rich-editor/renderers',
+      '@haklex/rich-renderer-alert/static',
+      '@haklex/rich-renderer-banner/static',
+      '@haklex/rich-renderer-codeblock/static',
+      '@haklex/rich-renderer-image/static',
+      '@haklex/rich-renderer-mention/static',
+      '@haklex/rich-renderer-mermaid/static',
+      '@haklex/rich-renderer-video/static',
+      '@haklex/rich-ext-chat/renderer',
+      '@haklex/rich-ext-code-snippet/renderer',
+      '@haklex/rich-ext-gallery/renderer',
+    ]) {
+      config.resolve.alias[`${specifier}$`] = fileURLToPath(
+        import.meta.resolve(specifier),
+      )
+    }
     config.externals.push({
       'utf-8-validate': 'commonjs utf-8-validate',
       bufferutil: 'commonjs bufferutil',
     })
 
     config.parallelism = 1
-    if (config.cache && typeof config.cache === 'object') {
-      config.cache.maxMemoryGenerations = dev ? 1 : 0
+    // Node 22+ and Next.js-supported browsers can run the async vendor loaders.
+    config.output.environment = {
+      ...config.output.environment,
+      asyncFunction: true,
+    }
+    if (!dev) {
+      config.cache = false
+    } else if (config.cache && typeof config.cache === 'object') {
+      config.cache.maxMemoryGenerations = 1
     }
 
     config.module.rules.push({

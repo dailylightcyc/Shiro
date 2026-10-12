@@ -8,6 +8,7 @@ on:
 
 jobs:
   trigger:
+    if: github.repository == 'Innei/Shiro'
     runs-on: ubuntu-latest
 
     steps:

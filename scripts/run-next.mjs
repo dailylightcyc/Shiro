@@ -72,11 +72,23 @@ if (
 }
 
 const isBuild = mode === 'build' || mode === 'analyze'
+const bundler = process.env.SHIRO_BUNDLER || (isBuild ? 'webpack' : 'turbopack')
+if (!['webpack', 'turbopack'].includes(bundler)) {
+  throw new Error('SHIRO_BUNDLER must be webpack or turbopack.')
+}
 const budget = Number(
-  process.env.SHIRO_MEMORY_MB || (isBuild || mode === 'dev' ? 3072 : 1536),
+  process.env.SHIRO_MEMORY_MB ||
+    (isBuild ? 2048 : mode === 'dev' ? 3072 : 1536),
 )
 const heap = Number(
-  process.env.SHIRO_HEAP_MB || (mode === 'dev' ? 512 : isBuild ? 640 : 768),
+  process.env.SHIRO_HEAP_MB ||
+    (mode === 'dev'
+      ? 512
+      : isBuild
+        ? bundler === 'webpack'
+          ? 1408
+          : 640
+        : 768),
 )
 if (
   !Number.isFinite(budget) ||
@@ -160,6 +172,7 @@ let child
 let peak = 0
 let scopePeak = 0
 let cancelled = false
+const stages = []
 const scopePath =
   isLinux && process.env.SHIRO_MEMORY_SCOPE
     ? `/sys/fs/cgroup${readFileSync('/proc/self/cgroup', 'utf8').trim().split('::')[1]}`
@@ -181,6 +194,19 @@ function scopeMemory() {
     return { current, oomKills: Number(events.oom_kill || 0) }
   } catch {
     return null
+  }
+}
+const hasCgroup = scopeMemory() !== null
+if (process.env.SHIRO_REQUIRE_CGROUP === '1') {
+  const limit =
+    hasCgroup && readFileSync(`${scopePath}/memory.max`, 'utf8').trim()
+  const swap =
+    hasCgroup && readFileSync(`${scopePath}/memory.swap.max`, 'utf8').trim()
+  if (Number(limit) !== budget * 1048576 || swap !== '0') {
+    rmSync(lock, { recursive: true, force: true })
+    throw new Error(
+      'A matching cgroup memory limit with swap disabled is required.',
+    )
   }
 }
 const saveOwner = () =>
@@ -250,6 +276,9 @@ function treeRss(pid) {
 }
 
 async function run(cli, args, stageHeap = heap, isNode = true) {
+  const stageStarted = performance.now()
+  let stageRss = 0
+  let stageScope = 0
   const initialOomKills = scopeMemory()?.oomKills || 0
   const command = isNode ? process.execPath : cli
   const commandArgs = isNode
@@ -289,10 +318,17 @@ async function run(cli, args, stageHeap = heap, isNode = true) {
   )
   saveOwner()
   let exceeded = false
-  const timer = setInterval(() => {
-    const rss = treeRss(child.pid)
+  let lastRssSample = 0
+  let rss = 0
+  const sample = () => {
+    if (performance.now() - lastRssSample >= 1000) {
+      rss = treeRss(child.pid)
+      lastRssSample = performance.now()
+    }
     const scoped = scopeMemory()
     peak = Math.max(peak, rss)
+    stageRss = Math.max(stageRss, rss)
+    stageScope = Math.max(stageScope, scoped?.current || 0)
     const usage = scoped?.current ?? rss
     const limit = scopePath ? budget - 128 : budget
     if (usage > limit && !exceeded) {
@@ -302,7 +338,9 @@ async function run(cli, args, stageHeap = heap, isNode = true) {
       )
       stop()
     }
-  }, 1000)
+  }
+  sample()
+  const timer = setInterval(sample, 100)
   const code = await new Promise((resolveExit) => {
     child.once('exit', (value) => resolveExit(value ?? 1))
     child.once('error', (error) => {
@@ -314,7 +352,17 @@ async function run(cli, args, stageHeap = heap, isNode = true) {
   child = undefined
   saveOwner()
   const wasOomKilled = (scopeMemory()?.oomKills || 0) > initialOomKills
-  return exceeded || wasOomKilled ? 137 : code
+  const result = exceeded || wasOomKilled ? 137 : code
+  stages.push({
+    command: cli.startsWith(root) ? cli.slice(root.length) : cli,
+    durationSeconds: Math.round((performance.now() - stageStarted) / 100) / 10,
+    heapMiB: stageHeap,
+    sampledPeakRssMiB: stageRss ? Math.ceil(stageRss) : null,
+    sampledPeakScopeMiB: Math.ceil(stageScope),
+    oomKilled: wasOomKilled,
+    code: result,
+  })
+  return result
 }
 
 console.log(
@@ -352,23 +400,32 @@ if (code === 0 && !cancelled && ['dev', 'build', 'analyze'].includes(mode)) {
   if (isBuild) {
     console.log('Batch 4: compile application routes with one compiler thread.')
   }
-  const bundler =
-    process.env.SHIRO_BUNDLER === 'webpack' ? '--webpack' : '--turbopack'
+  const bundlerFlag = `--${bundler}`
   const args =
     mode === 'dev'
-      ? ['dev', bundler, '-p', process.env.WEB_PORT || '2323']
-      : ['build', bundler]
+      ? ['dev', bundlerFlag, '-p', process.env.WEB_PORT || '2323']
+      : ['build', bundlerFlag]
   code = await run(require.resolve('next/dist/bin/next'), [...args, ...extra])
 }
+if (cancelled && code === 0) code = 130
 writeFileSync(
   resolve(runtime, 'last-run.json'),
   JSON.stringify(
     {
       mode,
+      nodeVersion: process.version,
+      bundler,
       budgetMiB: budget,
+      heapMiB: heap,
+      enforcement: hasCgroup
+        ? 'cgroup'
+        : isLinux
+          ? 'process-tree-rss'
+          : 'v8-heap',
       peakRssMiB: Math.ceil(peak),
       peakScopeMiB: Math.ceil(scopePeak),
       code,
+      stages,
     },
     null,
     2,

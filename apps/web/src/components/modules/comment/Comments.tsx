@@ -1,6 +1,5 @@
 'use client'
 
-import { BusinessEvents } from '@mx-space/webhook'
 import type { FC } from 'react'
 import { memo, useEffect } from 'react'
 
@@ -63,7 +62,7 @@ const CommentEventHandler = ({ refId }: { refId: string }) => {
     }
     document.addEventListener('visibilitychange', onVisibilityChange)
 
-    const cleaner = WsEvent.on(BusinessEvents.COMMENT_CREATE, (data) => {
+    const cleaner = WsEvent.on('comment.create', (data) => {
       if (
         data.refId === refId && // 如果标签页在后台
         document.visibilityState === 'hidden'
@@ -78,7 +77,7 @@ const CommentEventHandler = ({ refId }: { refId: string }) => {
   }, [refId])
   const updateCommentUI = useUpdateComment()
   useEffect(() => {
-    const cleaner = WsEvent.on(BusinessEvents.COMMENT_UPDATE, (data) => {
+    const cleaner = WsEvent.on('comment.update', (data) => {
       updateCommentUI({
         id: data.id,
         text: data.text,
