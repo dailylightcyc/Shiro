@@ -14,14 +14,13 @@ export const adminUrlAtom = atom<string | null>(null)
 export const webUrlAtom = atom<string | null>(null)
 
 export const fetchAppUrl = async () => {
-  const { data } = await queryClient.fetchQuery({
+  const data = await queryClient.fetchQuery({
     queryKey: ['app.url'],
     queryFn: () =>
-      apiClient.proxy.options.url.get<{
-        data: UrlConfig
-      }>(),
+      apiClient.proxy.options.url
+        .get<UrlConfig>()
+        .then((result) => result.$serialized),
   })
-
   if (data.adminUrl) jotaiStore.set(adminUrlAtom, data.adminUrl)
   jotaiStore.set(webUrlAtom, data.webUrl)
   return data

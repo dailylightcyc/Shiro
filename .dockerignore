@@ -1,26 +1,14 @@
-# Dependency directories
-node_modules/
-
-# next.js build output
-.next
-
-# typescript build output
-dist
-.env
-
-# pwa
-sw.js
-sw.js.*
-workbox-*.js
-workbox-*.js.*
-pages/debug.tsx
-/temp
-
-pages/dev
-
-patch/dist
-tmp
-out
-release.zip
-
-run
+# Docker packages host-built artifacts; no source compilation in Docker.
+**
+!Dockerfile
+!apps/
+!apps/web/
+!apps/web/.next/
+!apps/web/.next/standalone/
+!apps/web/.next/standalone/**
+!apps/web/.next/static/
+!apps/web/.next/static/**
+!apps/web/public/
+!apps/web/public/**
+**/.env
+**/.env*.local

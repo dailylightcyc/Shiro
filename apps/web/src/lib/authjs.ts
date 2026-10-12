@@ -1,9 +1,11 @@
+import { usernameClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/react'
 
 import { API_URL } from '~/constants/env'
 
 export const authClient = createAuthClient({
   baseURL: `${API_URL}/auth`,
+  plugins: [usernameClient()],
   fetchOptions: {
     credentials: 'include',
   },
@@ -34,8 +36,6 @@ export const getUserUrl = <
       return `https://github.com/${user.handle}`
     }
   }
-
-  return
 }
 
 const { useSession } = authClient

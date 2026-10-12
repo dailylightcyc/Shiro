@@ -1,4 +1,4 @@
-/* eslint-disable @eslint-react/no-use-context */
+ 
 import * as Slider from '@radix-ui/react-slider'
 import { m, useDragControls, useSpring } from 'motion/react'
 import { useTranslations } from 'next-intl'
@@ -105,7 +105,7 @@ export const VideoPlayer = ({
       rest.onClick?.(e)
       handleClick(e)
     },
-    muted: (rest.muted ?? isPlayer) ? false : true,
+    muted: !((rest.muted ?? isPlayer)),
     onDoubleClick(e) {
       rest.onDoubleClick?.(e)
       if (!isPlayer) return

@@ -110,7 +110,7 @@ const ButtonGroup = () => {
 
   const buildThemeTransition = (theme: 'light' | 'dark' | 'system') => {
     transitionViewIfSupported(() => {
-      // eslint-disable-next-line @eslint-react/dom/no-flush-sync
+      // eslint-disable-next-line react-dom/no-flush-sync
       flushSync(() => setTheme(theme))
     })
   }

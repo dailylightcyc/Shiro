@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import type * as React from 'react'
 import type { FC } from 'react'
@@ -18,8 +19,12 @@ import { loadScript, loadStyleSheet } from '~/lib/load-script'
 import { toast } from '~/lib/toast'
 
 import type { ShikiProps } from './shiki/Shiki'
-import { ShikiHighLighter } from './shiki/Shiki'
 import { ShikiHighLighterWrapper } from './shiki/ShikiWrapper'
+
+const ShikiHighLighter = dynamic(
+  () => import('./shiki/Shiki').then((module) => module.ShikiHighLighter),
+  { ssr: false },
+)
 
 interface Props {
   lang: string | undefined
@@ -194,7 +199,7 @@ export const ShikiFallback: FC<ShikiProps> = (props) => {
       if (!lang) return false
 
       if (!bundledLanguagesKeysSet) {
-        const { bundledLanguages } = await import('shiki/langs')
+        const { bundledLanguages } = await import('shiki/bundle/web')
         bundledLanguagesKeysSet = new Set(Object.keys(bundledLanguages))
       }
 

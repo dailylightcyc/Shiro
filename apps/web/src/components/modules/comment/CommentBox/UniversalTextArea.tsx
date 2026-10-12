@@ -8,7 +8,6 @@ import { useCallback, useMemo, useRef } from 'react'
 
 import { useIsMobile } from '~/atoms/hooks/viewport'
 import { FloatPopover } from '~/components/ui/float-popover'
-import { MarkdownEditor } from '~/components/ui/markdown-editor'
 import { useRefValue } from '~/hooks/common/use-ref-value'
 import { clsxm } from '~/lib/helper'
 
@@ -22,6 +21,14 @@ import { CommentBoxSlotPortal } from './providers'
 
 const EmojiPicker = dynamic(() =>
   import('../../shared/EmojiPicker').then((mod) => mod.EmojiPicker),
+)
+
+const MarkdownEditor = dynamic(
+  () =>
+    import('~/components/ui/markdown-editor/MarkdownEditor').then(
+      (module) => module.MarkdownEditor,
+    ),
+  { ssr: false },
 )
 
 export const UniversalTextArea: Component<{ autoFocus?: boolean }> = ({

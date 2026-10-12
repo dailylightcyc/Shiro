@@ -3,11 +3,18 @@ import { defineConfig } from 'eslint-config-hyoban'
 
 export default defineConfig(
   {
-    formatting: false,
+    stylistic: false,
     lessOpinionated: true,
-    ignores: [],
+    ignores: [
+      '**/public/vendor/**',
+      '**/lib/generated/**',
+      '**/artifacts/**',
+      '**/.runtime/**',
+      '**/*.md',
+      '**/*.md/**',
+    ],
     preferESM: false,
-    react: 'next',
+    react: true,
   },
   {
     rules: {
@@ -17,6 +24,31 @@ export default defineConfig(
       'no-restricted-syntax': 'off',
       'import/no-anonymous-default-export': 'off',
       eqeqeq: 'warn',
+      curly: ['warn', 'multi-line'],
+      // Keep newly introduced style checks advisory during this dependency upgrade.
+      'import/consistent-type-specifier-style': 'warn',
+      'unicorn/escape-case': 'warn',
+      'prefer-arrow-callback': 'warn',
+      'dot-notation': 'warn',
+      'test/prefer-lowercase-title': 'warn',
+      'no-useless-return': 'warn',
+      'no-unneeded-ternary': 'warn',
+      'one-var': 'warn',
+      'no-useless-computed-key': 'warn',
+      'unicorn/number-literal-case': 'warn',
+      'eslint-comments/no-unlimited-disable': 'warn',
+      'ts/no-use-before-define': 'off',
+      'node/prefer-global/process': 'off',
+      'node/prefer-global/buffer': 'off',
+      'e18e/prefer-static-regex': 'warn',
+      'e18e/prefer-url-canparse': 'warn',
+      'ts/ban-ts-comment': 'warn',
+      'no-new': 'warn',
+      'no-alert': 'warn',
+      'no-cond-assign': 'warn',
+      'prefer-promise-reject-errors': 'warn',
+      'no-throw-literal': 'warn',
+      'no-restricted-globals': 'warn',
 
       'no-console': 'warn',
       '@eslint-react/dom/no-missing-button-type': 0,
@@ -56,6 +88,10 @@ export default defineConfig(
     },
   },
 
+  {
+    files: ['**/messages/**/*.json'],
+    rules: { 'no-irregular-whitespace': 'off' },
+  },
   {
     files: ['**/*/package.json', 'package.json'],
     rules: {

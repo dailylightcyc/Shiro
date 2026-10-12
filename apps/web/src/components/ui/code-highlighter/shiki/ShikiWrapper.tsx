@@ -1,4 +1,4 @@
-/* eslint-disable @eslint-react/dom/no-dangerously-set-innerhtml-with-children */
+/* eslint-disable react-dom/no-dangerously-set-innerhtml-with-children */
 import clsx from 'clsx'
 import type { Variants } from 'motion/react'
 import { AnimatePresence, m } from 'motion/react'

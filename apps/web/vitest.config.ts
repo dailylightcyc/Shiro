@@ -5,10 +5,12 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   resolve: {
     alias: {
-      '~': resolve(__dirname, 'src'),
+      '~': resolve(import.meta.dirname, 'src'),
     },
   },
   test: {
     include: ['src/**/*.test.{ts,tsx}'],
+    maxWorkers: 1,
+    fileParallelism: false,
   },
 })

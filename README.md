@@ -18,7 +18,6 @@
 - [静かな森](https://innei.in)
 - [可愛い松](https://blog.wibus.ren/)
 
-
 欢迎体验 Shiro 带来的极简之美！
 
 ## :rocket: 核心特性
@@ -59,7 +58,8 @@ Shiro 消费 CMS 的 `{ data, meta }` 响应，使用 `createdAt`、`modifiedAt`
 文章翻译、点赞状态和链接 enrichment 从响应 meta 提取后进入页面缓存。
 搜索使用 CMS 内置搜索，评论分别调用访客、读者和站长回复接口。
 
-开发和生产构建默认使用 Webpack，以兼容富文本依赖的 CSS Highlight 样式。
+开发和生产构建默认使用 Turbopack，开发支持热更新和 React Fast Refresh。
+富文本预编译 CSS、Shiki 语言资源和 Mermaid 浏览器模块直接作为静态资源提供，减少重复编译。
 验证命令：`pnpm --filter @shiro/web test`、`pnpm --filter @shiro/web typecheck`
 和 `pnpm --filter @shiro/web build:ci`。
 
@@ -109,7 +109,7 @@ mkdir shiro && cd shiro
 wget https://raw.githubusercontent.com/Innei/Shiro/main/docker-compose.yml
 wget https://raw.githubusercontent.com/Innei/Shiro/main/.env.template .env
 
-vim .env # 配置环境变量
+vim .env     # 配置环境变量
 mkdir public # 放置自定义 Favicon
 docker compose up -d
 
@@ -120,6 +120,20 @@ docker compose pull
 ## :memo: Markdown 扩展
 
 了解更多 Markdown 扩展语法，请访问：https://shiro.innei.in/#/markdown
+
+## 本仓库的开发和服务器部署
+
+开发环境使用 Docker PostgreSQL、Redis 和 MX-CMS 14.15.2，前端使用 Next.js 开发服务器：
+
+```bash
+./start-dev.sh
+```
+
+打开 http://localhost:2323。首次访问进入引导页，填写站点信息并创建 CMS 管理员。之后可在 `/login` 使用同一账号登录，进入站点或 CMS 后台。
+
+开发与构建进程树默认预算均为 3072 MiB；构建和开发互斥，避免重复编译占满内存。Linux 可用 systemd 用户会话时同时设置 cgroup 硬限制；其他 Linux 环境监控整个编译进程树的 RSS。超出预算会停止本次编译。数据库、CMS 和站点资源均使用独立的 Docker 数据卷；再次启动会复用，Ctrl+C 只停止前端。停止前端也可执行 `pnpm dev:stop`。
+
+服务器部署、域名配置、数据卷和内存参数详见 [开发与部署说明](docs/development.md)。
 
 ## :star: 余白 / Yohaku
 

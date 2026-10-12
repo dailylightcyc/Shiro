@@ -42,7 +42,7 @@ export const Comments: FC<CommentBaseProps> = ({ refId }) => {
 }
 
 const CommentListItem: FC<{ commentId: string; refId: string }> = memo(
-  function CommentListItem({ commentId, refId }) {
+  ({ commentId, refId }) => {
     return (
       <CommentBoxProvider refId={refId}>
         <Comment commentId={commentId} />
@@ -65,7 +65,7 @@ const CommentEventHandler = ({ refId }: { refId: string }) => {
 
     const cleaner = WsEvent.on(BusinessEvents.COMMENT_CREATE, (data) => {
       if (
-        data.ref === refId && // 如果标签页在后台
+        data.refId === refId && // 如果标签页在后台
         document.visibilityState === 'hidden'
       ) {
         document.title = `新评论！${currentTitle}`

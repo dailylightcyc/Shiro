@@ -1,9 +1,11 @@
 import { execSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 
 import NextBundleAnalyzer from '@next/bundle-analyzer'
-import { codeInspectorPlugin } from 'code-inspector-plugin'
 import { config } from 'dotenv'
 import createNextIntlPlugin from 'next-intl/plugin'
+
+const svgPattern = /\.svg$/i
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
@@ -31,6 +33,15 @@ let nextConfig = {
   },
 
   reactStrictMode: true,
+  agentRules: false,
+  turbopack: {
+    resolveAlias: {
+      mermaid: './src/lib/mermaid-vendor.ts',
+      'shiki/bundle/full': './src/lib/shiki-bundle.ts',
+      'shiki/bundle/web': './src/lib/shiki-bundle.ts',
+    },
+  },
+  onDemandEntries: { maxInactiveAge: 15000, pagesBufferLength: 1 },
   productionBrowserSourceMaps: false,
   output: 'standalone',
   assetPrefix: isProd ? env.ASSETPREFIX || undefined : undefined,
@@ -41,8 +52,18 @@ let nextConfig = {
     // reactRemoveProperties: { properties: ['^data-id$', '^data-(\\w+)-id$'] },
   },
   experimental: {
-    serverMinification: true,
+    serverMinification: false,
     webpackBuildWorker: true,
+    webpackMemoryOptimizations: true,
+    cpus: 1,
+    parallelServerCompiles: false,
+    parallelServerBuildTraces: false,
+    serverSourceMaps: false,
+    preloadEntriesOnStart: false,
+    turbopackMemoryEviction: 'full',
+    turbopackGc: true,
+    turbopackFileSystemCacheForBuild: false,
+    turbopackMinify: isProd ? { server: false, client: true } : false,
     globalNotFound: true,
 
     // optimizePackageImports: ['dayjs'],
@@ -97,22 +118,27 @@ let nextConfig = {
       ],
     }
   },
-  turbopack: {
-    rules: codeInspectorPlugin({ bundler: 'turbopack', hotKeys: ['altKey'] }),
-  },
-
-  webpack: (config) => {
+  webpack: (config, { dev }) => {
+    const shikiBundle = fileURLToPath(
+      new URL('./src/lib/shiki-bundle.ts', import.meta.url),
+    )
+    config.resolve.alias['shiki/bundle/full'] = shikiBundle
+    config.resolve.alias['shiki/bundle/web'] = shikiBundle
+    config.resolve.alias.mermaid = fileURLToPath(
+      new URL('./src/lib/mermaid-vendor.ts', import.meta.url),
+    )
     config.externals.push({
       'utf-8-validate': 'commonjs utf-8-validate',
       bufferutil: 'commonjs bufferutil',
     })
 
-    config.plugins.push(
-      codeInspectorPlugin({ bundler: 'webpack', hotKeys: ['altKey'] }),
-    )
+    config.parallelism = 1
+    if (config.cache && typeof config.cache === 'object') {
+      config.cache.maxMemoryGenerations = dev ? 1 : 0
+    }
 
     config.module.rules.push({
-      test: /\.svg$/i,
+      test: svgPattern,
       type: 'asset/source',
     })
 

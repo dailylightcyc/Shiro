@@ -1,5 +1,6 @@
 'use client'
 
+import Script from 'next/script'
 import { useEffect } from 'react'
 import type { Blog, ItemList, WithContext } from 'schema-dts'
 
@@ -75,13 +76,15 @@ export default function Home() {
   }
   return (
     <>
-      <script
+      <Script
+        id="home-blog-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(ldJson),
         }}
       />
-      <script
+      <Script
+        id="home-articles-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(listLdJson),

@@ -50,3 +50,7 @@ dev
 
 # benchmark compiled output
 _bench_compiled*
+.runtime/
+artifacts/
+apps/web/public/vendor/
+apps/web/src/lib/generated/

@@ -3,9 +3,10 @@ import './Shiki.css'
 import { useIsomorphicLayoutEffect } from 'foxact/use-isomorphic-layout-effect'
 import type { FC } from 'react'
 import { use, useMemo, useState } from 'react'
-import type { BundledLanguage, LanguageInput, SpecialLanguage } from 'shiki'
-import { createHighlighterCore, createOnigurumaEngine } from 'shiki'
-import { bundledLanguages } from 'shiki/langs'
+import type { LanguageInput, SpecialLanguage } from 'shiki'
+import { bundledLanguages } from 'shiki/bundle/web'
+import { createHighlighterCore } from 'shiki/core'
+import { createOnigurumaEngine } from 'shiki/engine/oniguruma'
 import githubDark from 'shiki/themes/github-dark.mjs'
 import githubLight from 'shiki/themes/github-light.mjs'
 
@@ -50,7 +51,8 @@ const ShikiHighLighterImpl: FC<ShikiHighLighterImplProps> = (props) => {
         }
       }
       if (!language) return
-      const importFn = bundledLanguages[language as BundledLanguage]
+      const importFn =
+        bundledLanguages[language as keyof typeof bundledLanguages]
       if (!importFn) return
       return loadShikiLanguage(language || '', importFn)
     }, [highlighter, language]),

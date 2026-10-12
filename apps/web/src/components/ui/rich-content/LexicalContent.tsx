@@ -1,31 +1,31 @@
 'use client'
 
-import '@haklex/rich-kit-shiro/style.css'
-
+import type { RendererConfig, RichEditorVariant } from '@haklex/rich-editor'
 import type {
   EnhancedLinkCardProps,
   LinkCardFetchContext,
-  PresentDialogFn,
-  RendererConfig,
-  RichEditorVariant,
-} from '@haklex/rich-kit-shiro'
+} from '@haklex/rich-renderer-linkcard/static'
 import {
   createMxSpacePlugin,
-  createThemeStyle,
   LinkCardFetchProvider,
   LinkCardRenderer,
-  PresentDialogProvider,
-} from '@haklex/rich-kit-shiro'
-import { ShiroRenderer } from '@haklex/rich-kit-shiro/renderer'
+} from '@haklex/rich-renderer-linkcard/static'
+import { createThemeStyle } from '@haklex/rich-style-token/styles'
 import clsx from 'clsx'
 import type { SerializedEditorState } from 'lexical'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { getWebUrl } from '~/atoms'
-import { useModalStack } from '~/components/ui/modal/stacked/provider'
 import { API_URL } from '~/constants/env'
 import { useIsDark } from '~/hooks/common/use-is-dark'
 import { fetchGitHubApi } from '~/lib/github'
+
+import { CmsRichRenderer } from './CmsRichRenderer'
+
+const tmdbPrefix = /^\/3\//
+const bangumiPrefix = /^\/v0\//
+const trailingSlash = /\/$/
+const leadingSlash = /^\//
 
 const fallbackSansFont =
   "var(--app-font-sans, system-ui), -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, Helvetica, 'noto sans sc', 'hiragino sans gb', sans-serif, Apple Color Emoji, Segoe UI Emoji, Not Color Emoji"
@@ -42,7 +42,7 @@ const linkCardFetchContext: LinkCardFetchContext = {
     tmdb: {
       request: async (url) => {
         const u = new URL(url)
-        const path = u.pathname.replace(/^\/3\//, '')
+        const path = u.pathname.replace(tmdbPrefix, '')
         const r = await fetch(`/api/tmdb/${path}${u.search}`)
         return await r.json()
       },
@@ -50,7 +50,7 @@ const linkCardFetchContext: LinkCardFetchContext = {
     bangumi: {
       request: async (url) => {
         const u = new URL(url)
-        const path = u.pathname.replace(/^\/v0\//, '')
+        const path = u.pathname.replace(bangumiPrefix, '')
         const r = await fetch(`/api/bangumi/${path}`)
         return await r.json()
       },
@@ -86,7 +86,7 @@ const linkCardFetchContext: LinkCardFetchContext = {
     'mx-space': {
       request: async (path) => {
         const r = await fetch(
-          `${API_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`,
+          `${API_URL.replace(trailingSlash, '')}/${path.replace(leadingSlash, '')}`,
           { credentials: 'include' },
         )
         return (await r.json()).data
@@ -128,18 +128,6 @@ export function LexicalContent({
   }, [content])
 
   const isDark = useIsDark()
-  const { present } = useModalStack()
-  const presentDialog: PresentDialogFn = useCallback(
-    (props) =>
-      present({
-        title: props.title || ' ',
-        content: props.content,
-        clickOutsideToDismiss: props.clickOutsideToDismiss,
-        modalClassName: props.className,
-      }),
-    [present],
-  )
-
   const baseVarStyle = useMemo(
     () =>
       ({
@@ -176,9 +164,9 @@ export function LexicalContent({
   if (!editorState) return null
 
   return (
-    <PresentDialogProvider value={presentDialog}>
+    <>
       <LinkCardFetchProvider value={linkCardFetchContext}>
-        <ShiroRenderer
+        <CmsRichRenderer
           className={clsx(className, 'bg-transparent!')}
           rendererConfig={customRendererConfig}
           style={{ ...baseVarStyle, ...editorOverrideStyle }}
@@ -187,6 +175,6 @@ export function LexicalContent({
           variant={variant}
         />
       </LinkCardFetchProvider>
-    </PresentDialogProvider>
+    </>
   )
 }

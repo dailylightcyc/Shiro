@@ -32,11 +32,21 @@ export const Hero = () => {
   const { title, description } = useAppConfigSelector((config) => ({
     ...config.hero,
   }))!
+  const seo = useAggregationSelector((agg) => agg.seo)
+  const titleTemplate = title.template.length
+    ? title.template
+    : [
+        {
+          type: 'h1',
+          text: seo?.title,
+          class: 'text-4xl font-semibold lg:text-5xl',
+        },
+      ]
   const siteOwner = useAggregationSelector((agg) => agg.user)
   const { avatar, socialIds } = siteOwner || {}
 
   const titleAnimateD =
-    title.template.reduce((acc, cur) => acc + (cur.text?.length || 0), 0) * 50
+    titleTemplate.reduce((acc, cur) => acc + (cur.text?.length || 0), 0) * 50
   return (
     <div className="mx-auto mt-20 min-w-0 max-w-7xl overflow-hidden lg:mt-[-4.5rem] lg:h-dvh lg:min-h-[800px] lg:px-8">
       <TwoColumnLayout
@@ -50,9 +60,9 @@ export const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={softBouncePreset}
           >
-            {title.template.map((t, i) => {
+            {titleTemplate.map((t, i) => {
               const { type } = t
-              const prevAllTextLength = title.template
+              const prevAllTextLength = titleTemplate
                 .slice(0, i)
                 .reduce((acc, cur) => acc + (cur.text?.length || 0), 0)
               return createElement(
@@ -75,7 +85,9 @@ export const Hero = () => {
             transition={softBouncePreset}
             className="my-3 text-center lg:text-left"
           >
-            <span className="opacity-80">{description}</span>
+            <span className="opacity-80">
+              {description || seo?.description}
+            </span>
           </BottomToUpTransitionView>
 
           <ul className="center mx-[60px] mt-8 flex flex-wrap gap-4 gap-y-6 lg:mx-auto lg:mt-28 lg:justify-start lg:gap-y-4">

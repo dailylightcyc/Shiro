@@ -77,16 +77,15 @@ export function UserAuth() {
             ) : session ? (
               <ReaderAvatar />
             ) : (
-              hasProviders && (
-                <HeaderActionButton
-                  onClick={() => {
-                    presentOauthModal()
-                  }}
-                  aria-label={t('aria_login')}
-                >
-                  <UserArrowLeftIcon className="size-4" />
-                </HeaderActionButton>
-              )
+              <HeaderActionButton
+                onClick={() => {
+                  if (hasProviders) presentOauthModal()
+                  else window.location.assign('/login')
+                }}
+                aria-label={t('aria_login')}
+              >
+                <UserArrowLeftIcon className="size-4" />
+              </HeaderActionButton>
             )}
           </DropdownMenuTrigger>
 

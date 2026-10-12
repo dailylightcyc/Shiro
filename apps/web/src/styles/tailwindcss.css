@@ -1,8 +1,8 @@
-@import 'tailwindcss';
+@import 'tailwindcss' source(none);
 @import 'tw-animate-css';
 
-@source "./src/**/*.{js,jsx,ts,tsx}";
-@source "./node_modules/@ferrucc-io/emoji-picker/dist/**/*.{js,jsx,ts,tsx}";
+@source "../**/*.{js,jsx,ts,tsx}";
+@source "../../node_modules/@ferrucc-io/emoji-picker/dist/**/*.{js,jsx,ts,tsx}";
 @source inline("font-light text-3xl rounded p-1 bg-zinc-200 dark:bg-zinc-800/0 hover:dark:bg-zinc-800/100 bg-opacity-0 hover:bg-opacity-100 transition-background w-[1px] h-8 -bottom-2 bg-zinc-800/80 dark:bg-zinc-200/80 group-hover:opacity-100 transition-opacity group-hover:animation-blink w-full! w-full");
 
 @plugin "@tailwindcss/typography";

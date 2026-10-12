@@ -164,10 +164,10 @@ const SubmitShortcutPlugin = ({ onSubmit }: { onSubmit: () => void }) => {
   const [editor] = useLexicalComposerContext()
   useEffect(
     () =>
-      editor.registerCommand<KeyboardEvent>(
+      editor.registerCommand(
         KEY_ENTER_COMMAND,
         (event) => {
-          if (!(event.metaKey || event.ctrlKey)) return false
+          if (!event || !(event.metaKey || event.ctrlKey)) return false
           event.preventDefault()
           onSubmit()
           return true

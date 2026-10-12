@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { PublicEnvScript } from 'next-runtime-env'
@@ -15,6 +15,7 @@ import { AccentColorStyleInjector } from '~/components/modules/shared/AccentColo
 import { SearchPanelWithHotKey } from '~/components/modules/shared/SearchFAB'
 import { TocAutoScroll } from '~/components/modules/toc/TocAutoScroll'
 import { routing } from '~/i18n/routing'
+import { getCmsInitialization } from '~/lib/cms-bootstrap.server'
 import { PreRenderError } from '~/lib/error-factory'
 import { sansFont, serifFont } from '~/lib/fonts'
 import { apiClient } from '~/lib/request'
@@ -52,6 +53,10 @@ export const generateMetadata = async ({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> => {
   const { locale } = await params
+  const cmsState = await getCmsInitialization()
+  if (!cmsState.initialized) {
+    return { title: 'Shiro · 配置站点', robots: { index: false } }
+  }
   const fetchedData = await fetchAggregationData()
 
   const {
@@ -151,6 +156,9 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   setRequestLocale(locale)
 
+  const cmsState = await getCmsInitialization()
+  if (!cmsState.initialized) redirect('/setup')
+
   const messages = await getMessages()
 
   const data = await fetchAggregationData().catch(
@@ -195,6 +203,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <html lang={locale} className="noise themed" suppressHydrationWarning>
           <head>
             <PublicEnvScript />
+            <link rel="stylesheet" href="/vendor/rich-content.css" />
             <Global />
             <SayHi />
             <HydrationEndDetector />

@@ -1,3 +1,90 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - apps/*
+  - packages/*
+publicHoistPattern:
+  - mdast-util-to-markdown
+  - '*eslint*'
+  - '*prettier*'
+strictPeerDependencies: false
+networkConcurrency: 4
+childConcurrency: 1
+overrides:
+  'array-includes': 'npm:@nolyfill/array-includes@^1.0.44'
+  'array.prototype.findlastindex': 'npm:@nolyfill/array.prototype.findlastindex@^1.0.44'
+  'array.prototype.flat': 'npm:@nolyfill/array.prototype.flat@^1.0.44'
+  'array.prototype.flatmap': 'npm:@nolyfill/array.prototype.flatmap@^1.0.44'
+  'array.prototype.tosorted': 'npm:@nolyfill/array.prototype.tosorted@^1.0.44'
+  'has': 'npm:@nolyfill/has@^1.0.44'
+  'is-core-module': 'npm:@nolyfill/is-core-module@^1.0.39'
+  'object.assign': 'npm:@nolyfill/object.assign@^1.0.44'
+  'object.entries': 'npm:@nolyfill/object.entries@^1.0.44'
+  'object.fromentries': 'npm:@nolyfill/object.fromentries@^1.0.44'
+  'object.groupby': 'npm:@nolyfill/object.groupby@^1.0.44'
+  'object.hasown': 'npm:@nolyfill/object.hasown@^1.0.44'
+  'object.values': 'npm:@nolyfill/object.values@^1.0.44'
+  'string.prototype.matchall': 'npm:@nolyfill/string.prototype.matchall@^1.0.44'
+  '@types/react': '19.3.0'
+  '@types/react-dom': '19.3.0'
+  'lexical': '0.52.0'
+  '@lexical/code': '0.52.0'
+  '@lexical/code-core': '0.52.0'
+  '@lexical/clipboard': '0.52.0'
+  '@lexical/dragon': '0.52.0'
+  '@lexical/extension': '0.52.0'
+  '@lexical/file': '0.52.0'
+  '@lexical/headless': '0.52.0'
+  '@lexical/history': '0.52.0'
+  '@lexical/html': '0.52.0'
+  '@lexical/link': '0.52.0'
+  '@lexical/list': '0.52.0'
+  '@lexical/markdown': '0.52.0'
+  '@lexical/mark': '0.52.0'
+  '@lexical/offset': '0.52.0'
+  '@lexical/overflow': '0.52.0'
+  '@lexical/plain-text': '0.52.0'
+  '@lexical/react': '0.52.0'
+  '@lexical/rich-text': '0.52.0'
+  '@lexical/selection': '0.52.0'
+  '@lexical/table': '0.52.0'
+  '@lexical/text': '0.52.0'
+  '@lexical/utils': '0.52.0'
+  '@lexical/yjs': '0.52.0'
+  '@haklex/cm-editor': '0.46.4'
+  '@haklex/rich-editor': '0.46.4'
+  '@haklex/rich-editor-ui': '0.46.4'
+  '@haklex/rich-ext-chat': '0.46.4'
+  '@haklex/rich-ext-code-snippet': '0.46.4'
+  '@haklex/rich-ext-embed': '0.46.4'
+  '@haklex/rich-ext-excalidraw': '0.46.4'
+  '@haklex/rich-ext-gallery': '0.46.4'
+  '@haklex/rich-ext-nested-doc': '0.46.4'
+  '@haklex/rich-ext-poll': '0.46.4'
+  '@haklex/rich-headless': '0.46.4'
+  '@haklex/rich-plugin-block-handle': '0.46.4'
+  '@haklex/rich-plugin-floating-toolbar': '0.46.4'
+  '@haklex/rich-plugin-link-edit': '0.46.4'
+  '@haklex/rich-plugin-mention': '0.46.4'
+  '@haklex/rich-plugin-slash-menu': '0.46.4'
+  '@haklex/rich-plugin-table': '0.46.4'
+  '@haklex/rich-plugin-toolbar': '0.46.4'
+  '@haklex/rich-renderer-alert': '0.46.4'
+  '@haklex/rich-renderer-banner': '0.46.4'
+  '@haklex/rich-renderer-codeblock': '0.46.4'
+  '@haklex/rich-renderer-image': '0.46.4'
+  '@haklex/rich-renderer-katex': '0.46.4'
+  '@haklex/rich-renderer-linkcard': '0.46.4'
+  '@haklex/rich-renderer-mention': '0.46.4'
+  '@haklex/rich-renderer-mermaid': '0.46.4'
+  '@haklex/rich-renderer-ruby': '0.46.4'
+  '@haklex/rich-renderer-video': '0.46.4'
+  '@haklex/rich-style-token': '0.46.4'
+  'shiki': '4.5.0'
+  '@shikijs/transformers': '4.5.0'
+patchedDependencies:
+  '@innei/markdown-to-jsx-yet': 'patches/@innei__markdown-to-jsx-yet.patch'
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  esbuild: true
+  sharp: true
+  simple-git-hooks: true

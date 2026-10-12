@@ -13,10 +13,30 @@ import {
 } from './constants/system'
 import { defaultLocale, locales } from './i18n/config'
 import { routing } from './i18n/routing'
+import { fetchCmsInitialization } from './lib/cms-bootstrap'
+
+const absoluteUrl = /^https?:\/\//
 
 const intlMiddleware = createIntlMiddleware(routing)
 
 const NEXT_INTL_LOCALE_HEADER = 'X-NEXT-INTL-LOCALE'
+let cmsState: { initialized: boolean; expires: number } | undefined
+
+async function needsSetup() {
+  if (cmsState && cmsState.expires > Date.now()) return !cmsState.initialized
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
+    if (!apiUrl || !absoluteUrl.test(apiUrl)) return true
+    const initialized = await fetchCmsInitialization(apiUrl, 3000)
+    cmsState = {
+      initialized,
+      expires: Date.now() + (initialized ? 30000 : 1000),
+    }
+    return !initialized
+  } catch {
+    return true
+  }
+}
 
 // Check if a string looks like a locale code (2-3 lowercase letters)
 const localePattern = /^[a-z]{2,3}$/
@@ -55,7 +75,6 @@ function getLocaleFromRequest(req: NextRequest, pathname: string): string {
         const normalized = normalizeLocale(tag)
         if (normalized) return normalized
       }
-      return
     })() ||
     defaultLocale
   )
@@ -83,6 +102,8 @@ const shouldSkipIntl = (pathname: string) => {
   return (
     pathname.startsWith('/api') ||
     pathname.startsWith('/dashboard') ||
+    pathname === '/setup' ||
+    pathname === '/login' ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/_vercel') ||
     pathname.startsWith('/feed') ||
@@ -95,6 +116,11 @@ const shouldSkipIntl = (pathname: string) => {
 
 export async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl
+
+  // Redirect before Next compiles or renders the blog's dependency graph.
+  if (!shouldSkipIntl(pathname) && (await needsSetup())) {
+    return NextResponse.redirect(new URL('/setup', req.url))
+  }
 
   let geo = geolocation(req)
   const { headers } = req

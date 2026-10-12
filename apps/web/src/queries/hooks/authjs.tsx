@@ -122,6 +122,9 @@ const AuthjsLoginModalContent = () => {
 
       <div className="mt-6">
         <AuthProvidersRender />
+        <a href="/login" className="mt-4 block text-center text-sm text-accent">
+          CMS 管理员登录
+        </a>
       </div>
     </>
   )
