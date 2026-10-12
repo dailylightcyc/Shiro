@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { notFound, redirect } from 'next/navigation'
+import Script from 'next/script'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { PublicEnvScript } from 'next-runtime-env'
@@ -234,14 +235,14 @@ export default async function LocaleLayout({ children, params }: Props) {
                   <AggregationProvider
                     aggregationData={data}
                     appConfig={themeConfig.config}
-                  />
-                  <div id="root" data-theme>
-                    <Root>{children}</Root>
-                  </div>
-                  <TocAutoScroll />
-                  <SearchPanelWithHotKey />
-                  <SyncServerTime />
-                  <div className="fixed inset-y-0 right-0 w-[var(--removed-body-scroll-bar-size)]" />
+                  >
+                    <div id="root" data-theme>
+                      <Root>{children}</Root>
+                    </div>
+                    <TocAutoScroll />
+                    <SearchPanelWithHotKey />
+                    <SyncServerTime />
+                  </AggregationProvider>
                 </WebAppProviders>
               </ErrorBoundary>
             </NextIntlClientProvider>
@@ -253,7 +254,9 @@ export default async function LocaleLayout({ children, params }: Props) {
 }
 
 const SayHi = () => (
-  <script
+  <Script
+    id="shiro-version-banner"
+    strategy="beforeInteractive"
     dangerouslySetInnerHTML={{
       __html: `var version = "${version}";
     (${function () {

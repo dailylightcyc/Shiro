@@ -123,6 +123,14 @@ docker compose pull
 
 ## 本仓库的开发和服务器部署
 
+本地测试默认运行构建产物，复用现有开发环境的 CMS、数据库和管理员账号：
+
+```bash
+./start-preview.sh
+```
+
+打开 http://localhost:2323。使用 `/login` 登录 CMS 管理员后，在 `/dashboard` 绑定 GitHub 用户名；`/projects` 自动同步公开仓库。修改源码后重新运行脚本，主机按批次串行构建，Docker 运行产物。服务器部署使用 `./start-production.sh` 和独立的生产环境配置。
+
 开发环境使用 Docker PostgreSQL、Redis 和 MX-CMS 14.15.2，前端使用 Next.js 开发服务器：
 
 ```bash

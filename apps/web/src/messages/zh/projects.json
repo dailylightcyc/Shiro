@@ -1,3 +1,5 @@
 {
-  "page_title": "项目"
+  "page_title": "项目",
+  "cached_projects": "GitHub 暂时限流或不可用，当前显示最近一次同步的公开仓库。",
+  "sync_error": "部分项目暂时无法同步，请稍后刷新。已加载的项目仍可查看。"
 }

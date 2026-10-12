@@ -22,7 +22,6 @@ import {
 import { NoteFontSettingFab } from '~/components/modules/note/NoteFontFab'
 import { NoteMainContainer } from '~/components/modules/note/NoteMainContainer'
 import { BanCopyWrapper } from '~/components/modules/shared/BanCopyWrapper'
-import { ReadIndicatorForMobile } from '~/components/modules/shared/ReadIndicator'
 import { TocFAB } from '~/components/modules/toc/TocFAB'
 import { TocHeadingStrategyProvider } from '~/components/modules/toc/TocHeadingStrategy'
 import { BottomToUpSoftScaleTransitionView } from '~/components/ui/transition'
@@ -93,7 +92,6 @@ function PageInner({
 
       <NoteHideIfSecret>
         <WrappedElementProvider eoaDetect>
-          <ReadIndicatorForMobile />
           <NoteMarkdownImageRecordProvider>
             <BanCopyWrapper>
               <MarkdownSelection>

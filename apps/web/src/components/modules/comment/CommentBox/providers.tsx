@@ -6,17 +6,17 @@ import { atomWithStorage } from 'jotai/utils'
 import type { FC, PropsWithChildren } from 'react'
 import { createContext, memo, useEffect, useMemo } from 'react'
 
-import { useBeforeMounted } from '~/hooks/common/use-before-mounted'
-import { jotaiStore } from '~/lib/store'
-
 import type { CommentAnchor } from '../types'
 import { setCommentActionLeftSlot, useCommentActionLeftSlot } from './hooks'
 
 export const commentStoragePrefix = 'comment-'
-export const createInitialValue = () => ({
+export const createInitialValue = (
+  text = '',
+  anchor: CommentAnchor | null = null,
+) => ({
   refId: atom(''),
 
-  text: atom(''),
+  text: atom(text),
   author: atomWithStorage(`${commentStoragePrefix}author`, ''),
   mail: atomWithStorage(`${commentStoragePrefix}mail`, ''),
   url: atomWithStorage(`${commentStoragePrefix}url`, ''),
@@ -24,7 +24,7 @@ export const createInitialValue = () => ({
   avatar: atom(''),
   source: atom(''),
 
-  anchor: atom<CommentAnchor | null>(null),
+  anchor: atom<CommentAnchor | null>(anchor),
 
   // settings
   isWhisper: atomWithStorage(`${commentStoragePrefix}is-whisper`, false),
@@ -53,19 +53,11 @@ export const CommentBoxProvider = (
 
   const ctxValue = useMemo(
     () => ({
-      ...createInitialValue(),
+      ...createInitialValue(initialValue, anchor),
       refId: atom(refId),
     }),
-    [refId],
+    [refId, initialValue, anchor],
   )
-  useBeforeMounted(() => {
-    if (initialValue) {
-      jotaiStore.set(ctxValue.text, initialValue)
-    }
-    if (anchor) {
-      jotaiStore.set(ctxValue.anchor, anchor)
-    }
-  })
   return (
     <CommentBoxContext key={refId} value={ctxValue}>
       <CommentBoxLifeCycleContext

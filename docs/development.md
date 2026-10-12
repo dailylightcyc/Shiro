@@ -1,5 +1,15 @@
 # 开发、部署与资源预算
 
+## 运行构建产物进行测试
+
+```bash
+./start-preview.sh
+```
+
+脚本使用 `shiro-dev` 和 `.env.development.local`，复用已存在的 CMS、数据库、文章和管理员账号。在主机按下面的批次串行构建，再制作运行镜像并启动网关和前端容器。源码不会热更新；改完源码重新执行脚本即可。
+
+访问 `/login` 登录 CMS 管理员，访问 `/dashboard` 保存 GitHub 用户名或个人主页地址。绑定信息保存在 CMS 的站长资料中，`/projects` 自动分页同步公开仓库并与 CMS 项目按仓库 URL 去重。GitHub 限流、超时或服务故障时，使用最近一次成功同步的公开仓库，并在页面提示缓存状态；没有缓存时仍显示 CMS 项目并提示失败。快照保存在独立的 `github-cache` 数据卷中，容器更新后仍可复用。此处绑定公开项目来源，不涉及 GitHub OAuth 登录；公开仓库同步无需配置 Token。可选 `GH_TOKEN` 只在服务端用于公开用户和仓库列表请求，可写入本地环境文件；不会发送到浏览器，也不会用于任意仓库路径。
+
 ## 一键开发
 
 安装 Node.js >=22.12、Corepack 和 Docker Compose，启动 Docker 后执行：
@@ -33,11 +43,22 @@ docker compose --project-name shiro-dev --env-file .env.development.local -f com
 
 | 模式            | 进程树预算 | V8 堆上限 |
 | --------------- | ---------- | --------- |
-| 开发            | 3072 MiB   | 768 MiB   |
-| 生产构建        | 3072 MiB   | 768 MiB   |
+| 开发            | 3072 MiB   | 512 MiB   |
+| 生产构建        | 3072 MiB   | 640 MiB   |
 | 类型检查 / lint | 1536 MiB   | 768 MiB   |
 
 Linux systemd 用户会话可用时，启动器通过 cgroup 限制整个任务的内存、禁止任务使用交换分区，并限制为最多两个 CPU 的份额。没有 systemd 的 Linux 使用每秒一次的进程树 RSS 监控，超出预算时终止该任务；这种采样方式可能出现短暂越限。Windows/macOS 使用 V8 堆限制和编译互斥，不提供 Linux 的 RSS/cgroup 限制。
+
+构建分四批执行，各批使用独立进程，完成后释放内存：
+
+1. 准备富文本样式、Shiki 语言语法与 Mermaid 浏览器资源。
+2. 使用 Rolldown 单独预打包 Excalidraw 白板及其图表依赖。按锁文件和打包脚本生成指纹，依赖没有变化时复用本地结果；文章使用白板时加载本地浏览器模块，复用应用的 React 实例。
+3. 单线程检查 TypeScript 类型。
+4. 以一个 Rust 编译线程整合 Next.js 路由和 standalone 产物。
+
+Next.js 路由在最后一批统一生成；它们共享路由清单和服务端运行时，不能把多个独立 `.next` 输出直接拼接成同一个站点。大依赖提前分批处理，避免进入这一步的编译依赖图。之后 Docker 只复制成品。`pnpm vendors` 可单独执行资源预打包。
+
+启动器监控整个 cgroup 的内存，包含原生分配和计入任务的文件缓存，并预留 128 MiB 停止余量。发生内核 OOM 时返回失败码，避免 Next CLI 的零退出码把失败误报为成功。
 
 开发和生产构建默认使用 Turbopack。开发支持热更新与 React Fast Refresh，启用开发磁盘缓存和缓存回收，开发代码不压缩以保留 Fast Refresh 状态；构建使用一个 Rust 编译线程和一个页面生成 worker。代码检查插件已移除。首次部署的跳转在 proxy 阶段完成，进入引导页前无需编译整个博客首页。生产源码也在主机通过预算启动器串行构建。Dockerfile 只复制 standalone、静态文件和公开资源，容器启动时不安装前端依赖、不编译源码。
 
@@ -54,7 +75,7 @@ pnpm dev:stop
 
 生产构建关闭服务端压缩和构建磁盘缓存以减少峰值，浏览器代码仍然压缩。服务器的冷启动和磁盘占用可能略有增加。Tailwind 只扫描前端源码和指定 UI 依赖，避免扫描生成的第三方资源。
 
-每次运行的采样峰值和结果保存在忽略提交的 `.runtime/last-run.json`。如需调整预算，显式设置 `SHIRO_MEMORY_MB` 和 `SHIRO_HEAP_MB`，前者必须大于后者。
+每次运行的进程树 RSS、cgroup 峰值和结果保存在忽略提交的 `.runtime/last-run.json`，并分别保留在 `.runtime/build-result.json` 等按模式命名的文件中。如需调整预算，显式设置 `SHIRO_MEMORY_MB` 和 `SHIRO_HEAP_MB`，前者必须大于后者。
 
 ## 服务器部署
 

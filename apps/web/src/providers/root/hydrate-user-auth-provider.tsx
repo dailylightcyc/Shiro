@@ -1,11 +1,10 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { setIsOwnerLogged } from '~/atoms/hooks/owner'
-import { isClientSide } from '~/lib/env'
 
 export const HydrateuserAuthProvider = (props: { isLogged: boolean }) => {
-  if (props.isLogged && isClientSide) {
-    setIsOwnerLogged(true)
-  }
+  useEffect(() => setIsOwnerLogged(props.isLogged), [props.isLogged])
   return null
 }

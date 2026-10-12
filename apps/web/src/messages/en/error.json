@@ -10,7 +10,7 @@
   "network_description": "Network connection failed. Please check your network settings.",
   "api_fetchError": "Failed to fetch initial data. Please check if the API server is running. Error message:",
   "render_error": "An error occurred while rendering the page",
-  "render_error_contact": "If this error persists, please contact the developer",
+  "render_error_contact": "If this error persists, please contact the site administrator",
   "render_error_thanks": ", thank you!",
   "page_deleted": "This page has been deleted",
   "back_home": "Back to Home",

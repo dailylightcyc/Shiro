@@ -2,21 +2,16 @@
 
 import { useTranslations } from 'next-intl'
 import type { ElementType } from 'react'
-import { useDeferredValue } from 'react'
-import { useInView } from 'react-intersection-observer'
 
-import { useIsMobile } from '~/atoms/hooks/viewport'
 import {
   CircleProgress,
   MaterialSymbolsProgressActivity,
 } from '~/components/icons/Progress'
 import { MotionButtonBase } from '~/components/ui/button'
-import { RootPortal } from '~/components/ui/portal'
 import { IconSmoothTransition } from '~/components/ui/transition'
 import { useReadPercent } from '~/hooks/shared/use-read-percent'
 import { clsxm } from '~/lib/helper'
 import { springScrollToTop } from '~/lib/scroller'
-import { useIsEoFWrappedElement } from '~/providers/shared/WrappedElementProvider'
 
 export const ReadIndicator: Component<{
   as?: ElementType
@@ -25,13 +20,8 @@ export const ReadIndicator: Component<{
   const readPercent = useReadPercent()
   const As = as || 'span'
 
-  const { ref, inView } = useInView()
-
   return (
-    <As
-      className={clsxm('text-zinc-800 dark:text-neutral-300', className)}
-      ref={ref}
-    >
+    <As className={clsxm('text-zinc-800 dark:text-neutral-300', className)}>
       <div className="flex items-center gap-2">
         <IconSmoothTransition
           solidIcon={<MaterialSymbolsProgressActivity />}
@@ -52,43 +42,6 @@ export const ReadIndicator: Component<{
         <i className="i-mingcute-arrow-up-circle-line" />
         <span className="whitespace-nowrap">{t('back_to_top')}</span>
       </MotionButtonBase>
-      {!inView && <ReadIndicatorVertical className="right-px" />}
     </As>
   )
-}
-
-const ReadIndicatorVertical: Component = ({ className }) => {
-  const readPercent = useDeferredValue(useReadPercent())
-  const isEOA = useIsEoFWrappedElement()
-
-  // TODO new API ScrollTimeline but safari not support
-  // const wrappedElement = useWrappedElement()
-  // const timeline = new ScrollTimeline({
-  //   source: wrappedElement,
-  //   axis: "block",
-  // });
-  return (
-    <RootPortal>
-      <div
-        className={clsxm(
-          'fixed inset-y-0 right-0 z-[99] w-px transition-opacity duration-200 ease-in-out',
-          isEOA ? 'opacity-0' : 'opacity-100',
-          className,
-        )}
-      >
-        <div
-          className="absolute top-0 w-full bg-accent/80 duration-75 ease-linear"
-          style={{
-            height: `${readPercent}%`,
-          }}
-        />
-      </div>
-    </RootPortal>
-  )
-}
-export const ReadIndicatorForMobile: Component<{}> = () => {
-  const isMobile = useIsMobile()
-  if (!isMobile) return null
-
-  return <ReadIndicatorVertical />
 }

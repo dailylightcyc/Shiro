@@ -37,6 +37,9 @@ let nextConfig = {
   turbopack: {
     resolveAlias: {
       mermaid: './src/lib/mermaid-vendor.ts',
+      '@excalidraw/excalidraw': './src/lib/excalidraw-vendor.ts',
+      '@excalidraw/excalidraw/index.css':
+        './src/lib/excalidraw-style-vendor.ts',
       'shiki/bundle/full': './src/lib/shiki-bundle.ts',
       'shiki/bundle/web': './src/lib/shiki-bundle.ts',
     },
@@ -61,7 +64,7 @@ let nextConfig = {
     serverSourceMaps: false,
     preloadEntriesOnStart: false,
     turbopackMemoryEviction: 'full',
-    turbopackGc: true,
+    turbopackGc: { rootTtlMs: 60000 },
     turbopackFileSystemCacheForBuild: false,
     turbopackMinify: isProd ? { server: false, client: true } : false,
     globalNotFound: true,
@@ -126,6 +129,12 @@ let nextConfig = {
     config.resolve.alias['shiki/bundle/web'] = shikiBundle
     config.resolve.alias.mermaid = fileURLToPath(
       new URL('./src/lib/mermaid-vendor.ts', import.meta.url),
+    )
+    config.resolve.alias['@excalidraw/excalidraw$'] = fileURLToPath(
+      new URL('./src/lib/excalidraw-vendor.ts', import.meta.url),
+    )
+    config.resolve.alias['@excalidraw/excalidraw/index.css$'] = fileURLToPath(
+      new URL('./src/lib/excalidraw-style-vendor.ts', import.meta.url),
     )
     config.externals.push({
       'utf-8-validate': 'commonjs utf-8-validate',

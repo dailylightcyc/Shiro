@@ -9,6 +9,8 @@
   "scripts": {
     "build": "pnpm --filter @shiro/web build",
     "dev": "node scripts/run-next.mjs dev",
+    "preview": "bash ./start-preview.sh",
+    "vendors": "node scripts/run-next.mjs vendors",
     "lint": "node scripts/run-next.mjs lint",
     "prepare": "pnpm exec simple-git-hooks",
     "release": "bumpp -r",

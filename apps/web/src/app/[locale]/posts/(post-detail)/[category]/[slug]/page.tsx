@@ -13,7 +13,6 @@ import {
   PostRelated,
 } from '~/components/modules/post'
 import { GoToAdminEditingButton } from '~/components/modules/shared/GoToAdminEditingButton'
-import { ReadIndicatorForMobile } from '~/components/modules/shared/ReadIndicator'
 import { TocFAB } from '~/components/modules/toc/TocFAB'
 import { TocHeadingStrategyProvider } from '~/components/modules/toc/TocHeadingStrategy'
 import {
@@ -139,7 +138,6 @@ const PostPage = ({ data }: { data: PostWithTranslation }) => {
           <PostRelated type="before" />
         </div>
         <WrappedElementProvider eoaDetect>
-          <ReadIndicatorForMobile />
           <PostMarkdownImageRecordProvider>
             <MarkdownSelection>
               <article

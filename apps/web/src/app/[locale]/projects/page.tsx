@@ -8,6 +8,7 @@ import { ProjectList } from '~/components/modules/project/ProjectList'
 import { NothingFound } from '~/components/modules/shared/NothingFound'
 import { Loading } from '~/components/ui/loading'
 import { BottomToUpTransitionView } from '~/components/ui/transition'
+import { fetchGitHubProjects, mergeProjects } from '~/lib/github-projects'
 import { noopArr } from '~/lib/noop'
 import { apiClient } from '~/lib/request'
 import { useAggregationSelector } from '~/providers/root/aggregation-data-provider'
@@ -15,23 +16,45 @@ import { useAggregationSelector } from '~/providers/root/aggregation-data-provid
 export default function Page() {
   const t = useTranslations('projects')
   const tCommon = useTranslations('common')
-  const { data, isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    error: cmsError,
+  } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
       const data = await apiClient.project.getAll()
       return data.$serialized
     },
+    refetchOnMount: 'always',
+    meta: { persist: false },
   })
 
   const githubUsername = useAggregationSelector(
     (state) => state.user?.socialIds?.github,
   )
+  const github = useQuery({
+    queryKey: ['github-projects', githubUsername],
+    queryFn: async () => {
+      let cached = false
+      const projects = await fetchGitHubProjects(githubUsername!, () => {
+        cached = true
+      })
+      return { projects, cached }
+    },
+    enabled: !!githubUsername,
+    staleTime: 5 * 60 * 1000,
+    meta: { persist: false },
+  })
 
-  if (isLoading) {
+  if (isLoading || (!!githubUsername && github.isLoading)) {
     return <Loading useDefaultLoadingText />
   }
 
-  if (!data) return <NothingFound />
+  const projects = mergeProjects(
+    data || noopArr,
+    github.data?.projects || noopArr,
+  )
 
   return (
     <div className="mt-10">
@@ -52,8 +75,22 @@ export default function Page() {
         </h1>
       </header>
       <main>
+        {github.data?.cached && (
+          <p role="status" className="mb-6 text-sm text-base-content/70">
+            {t('cached_projects')}
+          </p>
+        )}
+        {(cmsError || github.error) && (
+          <p role="alert" className="mb-6 text-sm text-red-600">
+            {t('sync_error')}
+          </p>
+        )}
         <BottomToUpTransitionView>
-          <ProjectList projects={data || noopArr} />
+          {projects.length ? (
+            <ProjectList projects={projects} />
+          ) : (
+            <NothingFound />
+          )}
         </BottomToUpTransitionView>
       </main>
     </div>

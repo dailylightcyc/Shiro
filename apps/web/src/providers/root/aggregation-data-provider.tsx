@@ -1,12 +1,10 @@
 'use client'
 
 import { atom, useAtomValue } from 'jotai'
-import { selectAtom } from 'jotai/utils'
 import type { FC, PropsWithChildren } from 'react'
-import { useCallback, useEffect, useRef } from 'react'
+import { createContext, useContext, useEffect } from 'react'
 
 import { setWebUrl } from '~/atoms'
-import { useBeforeMounted } from '~/hooks/common/use-before-mounted'
 import { isDev } from '~/lib/env'
 import type { SiteAggregation as AggregateRoot } from '~/lib/fetch/aggregation'
 import { jotaiStore } from '~/lib/store'
@@ -15,6 +13,8 @@ export type { AggregateRoot }
 
 export const aggregationDataAtom = atom<null | AggregateRoot>(null)
 const appConfigAtom = atom<AppConfig | null>(null)
+const AggregationContext = createContext<AggregateRoot | null>(null)
+const AppConfigContext = createContext<AppConfig | null>(null)
 
 export const AggregationProvider: FC<
   PropsWithChildren<{
@@ -22,25 +22,6 @@ export const AggregationProvider: FC<
     appConfig: AppConfig
   }>
 > = ({ children, aggregationData, appConfig }) => {
-  useBeforeMounted(() => {
-    if (!aggregationData) return
-    jotaiStore.set(aggregationDataAtom, aggregationData)
-    setWebUrl(aggregationData.url.webUrl)
-  })
-  useBeforeMounted(() => {
-    if (!appConfig) return
-    jotaiStore.set(appConfigAtom, appConfig)
-  })
-  // useHydrateAtoms(
-  //   [
-  //     [aggregationDataAtom, aggregationData],
-  //     [appConfigAtom, appConfig],
-  //   ],
-  //   {
-  //     dangerouslyForceHydrate: true,
-  //   },
-  // )
-
   useEffect(() => {
     if (!appConfig) return
     jotaiStore.set(appConfigAtom, appConfig)
@@ -52,47 +33,32 @@ export const AggregationProvider: FC<
     setWebUrl(aggregationData.url.webUrl)
   }, [aggregationData])
 
-  const callOnceRef = useRef(false)
-
-  useEffect(() => {
-    if (callOnceRef.current) return
-    if (!aggregationData?.user) return
-    callOnceRef.current = true
-  }, [aggregationData?.user])
-
-  return children
+  return (
+    <AggregationContext value={aggregationData}>
+      <AppConfigContext value={appConfig}>{children}</AppConfigContext>
+    </AggregationContext>
+  )
 }
 
 export const useAggregationSelector = <T,>(
   selector: (atomValue: AggregateRoot) => T,
-  deps: any[] = [],
-): T | null =>
-  useAtomValue(
-    // @ts-ignore
-    selectAtom(
-      aggregationDataAtom,
-      useCallback(
-        (atomValue) => (!atomValue ? null : selector(atomValue)),
-        deps,
-      ),
-    ),
-  )
+  _deps: any[] = [],
+): T | null => {
+  const snapshot = useContext(AggregationContext)
+  const fallback = useAtomValue(aggregationDataAtom, { store: jotaiStore })
+  const data = snapshot ?? fallback
+  return data ? selector(data) : null
+}
 
 export const useAppConfigSelector = <T,>(
   selector: (atomValue: AppConfig) => T,
-  deps: any[] = [],
-): T | null =>
-  useAtomValue(
-    // @ts-ignore
-    selectAtom(
-      appConfigAtom,
-      useCallback(
-        (atomValue) =>
-          !atomValue ? null : noThrowFnWrapper(selector)(atomValue),
-        deps,
-      ),
-    ),
-  )
+  _deps: any[] = [],
+): T | null => {
+  const snapshot = useContext(AppConfigContext)
+  const fallback = useAtomValue(appConfigAtom, { store: jotaiStore })
+  const config = snapshot ?? fallback
+  return config ? noThrowFnWrapper(selector)(config) : null
+}
 
 export const getAggregationData = () => jotaiStore.get(aggregationDataAtom)
 

@@ -1,11 +1,13 @@
+html::-webkit-scrollbar,
 body::-webkit-scrollbar {
-  height: 0;
+  display: none;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 html {
   /*  for firefox */
-  scrollbar-color: var(--color-gray-300);
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 
 html[data-theme='dark'] {
@@ -13,8 +15,7 @@ html[data-theme='dark'] {
 }
 
 body {
-  overflow: overlay;
-  /* scrollbar-gutter: stable; */
+  scrollbar-width: none;
 }
 
 [data-theme='dark'] {

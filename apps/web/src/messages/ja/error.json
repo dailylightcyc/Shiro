@@ -10,7 +10,7 @@
   "network_description": "ネットワーク接続に失敗しました。ネットワーク設定を確認してください。",
   "api_fetchError": "初期データの取得に失敗しました。APIサーバーが正常に動作しているか確認してください。エラーメッセージ：",
   "render_error": "ページのレンダリング中にエラーが発生しました",
-  "render_error_contact": "エラーが繰り返し発生する場合は、開発者に連絡してください",
+  "render_error_contact": "エラーが繰り返し発生する場合は、サイト管理者に連絡してください",
   "render_error_thanks": "、ありがとうございます！",
   "page_deleted": "このページは削除されました",
   "back_home": "ホームに戻る",

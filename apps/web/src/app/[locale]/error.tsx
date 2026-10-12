@@ -20,7 +20,7 @@ export default ({ error, reset }: any) => {
         <h2 className="mb-5 text-center">
           <p>{t('render_error')}</p>
           <p>
-            {t('render_error_contact')} <a href="mailto:i@innei.in">Innei</a>
+            {t('render_error_contact')}
             {t('render_error_thanks')}
           </p>
         </h2>

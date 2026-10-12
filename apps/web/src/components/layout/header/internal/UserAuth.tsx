@@ -70,7 +70,7 @@ export function UserAuth() {
   return (
     <AnimatePresence>
       <div style={opacityStyle}>
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger>
             {isOwner ? (
               <OwnerAvatar />

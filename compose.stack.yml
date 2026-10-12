@@ -103,6 +103,10 @@ services:
       NEXT_PUBLIC_CLIENT_API_URL: /api/v3
       NEXT_PUBLIC_GATEWAY_URL: ${PUBLIC_WEB_URL:-http://localhost:2323}
       NEXT_PUBLIC_CMS_ADMIN_URL: ${PUBLIC_WEB_URL:-http://localhost:2323}/proxy/qaqdmin
+      GH_TOKEN: ${GH_TOKEN:-}
+      SHIRO_GITHUB_CACHE_DIR: /app/cache/github
+    volumes:
+      - github-cache:/app/cache/github
     healthcheck:
       test:
         - CMD
@@ -142,3 +146,4 @@ volumes:
   postgres-data:
   redis-data:
   cms-data:
+  github-cache:

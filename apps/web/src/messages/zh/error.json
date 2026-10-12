@@ -10,7 +10,7 @@
   "network_description": "网络连接失败，请检查您的网络设置",
   "api_fetchError": "初始数据的获取失败，请检查 API 服务器是否正常运行。接口请求错误信息：",
   "render_error": "渲染页面时出现了错误",
-  "render_error_contact": "多次出现错误请联系开发者",
+  "render_error_contact": "多次出现错误请联系站点管理员",
   "render_error_thanks": "，谢谢！",
   "page_deleted": "此页面已被删除",
   "back_home": "返回首页",

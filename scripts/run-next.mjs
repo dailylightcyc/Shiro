@@ -47,19 +47,27 @@ const sameProcess = (pid, start) =>
 if (mode === 'stop') {
   if (existsSync(pidFile)) {
     const owner = JSON.parse(readFileSync(pidFile, 'utf8'))
-    if (sameProcess(owner.pid, owner.started))
-      {process.kill(owner.pid, 'SIGTERM')}
-    else if (sameProcess(owner.child, owner.childStarted)) {
+    if (sameProcess(owner.pid, owner.started)) {
+      process.kill(owner.pid, 'SIGTERM')
+    } else if (sameProcess(owner.child, owner.childStarted)) {
       process.kill(isLinux ? -owner.child : owner.child, 'SIGTERM')
     }
   }
   process.exit(0)
 }
 if (
-  !['dev', 'build', 'analyze', 'typecheck', 'lint', 'deploy'].includes(mode)
+  ![
+    'dev',
+    'build',
+    'analyze',
+    'typecheck',
+    'lint',
+    'deploy',
+    'vendors',
+  ].includes(mode)
 ) {
   throw new Error(
-    'Usage: node scripts/run-next.mjs [dev|build|analyze|typecheck|lint|deploy|stop] [CLI options]',
+    'Usage: node scripts/run-next.mjs [dev|build|analyze|typecheck|lint|deploy|vendors|stop] [CLI options]',
   )
 }
 
@@ -67,7 +75,9 @@ const isBuild = mode === 'build' || mode === 'analyze'
 const budget = Number(
   process.env.SHIRO_MEMORY_MB || (isBuild || mode === 'dev' ? 3072 : 1536),
 )
-const heap = Number(process.env.SHIRO_HEAP_MB || 768)
+const heap = Number(
+  process.env.SHIRO_HEAP_MB || (mode === 'dev' ? 512 : isBuild ? 640 : 768),
+)
 if (
   !Number.isFinite(budget) ||
   budget < 256 ||
@@ -117,8 +127,9 @@ if (
         env: { ...process.env, SHIRO_MEMORY_SCOPE: '1' },
       },
     )
-    for (const signal of ['SIGINT', 'SIGTERM'])
-      {process.on(signal, () => scoped.kill(signal))}
+    for (const signal of ['SIGINT', 'SIGTERM']) {
+      process.on(signal, () => scoped.kill(signal))
+    }
     scoped.on('exit', (code) => process.exit(code ?? 1))
     scoped.on('error', (error) => {
       console.error(error.message)
@@ -147,7 +158,31 @@ try {
 }
 let child
 let peak = 0
+let scopePeak = 0
 let cancelled = false
+const scopePath =
+  isLinux && process.env.SHIRO_MEMORY_SCOPE
+    ? `/sys/fs/cgroup${readFileSync('/proc/self/cgroup', 'utf8').trim().split('::')[1]}`
+    : null
+function scopeMemory() {
+  if (!scopePath) return null
+  try {
+    const events = Object.fromEntries(
+      readFileSync(`${scopePath}/memory.events`, 'utf8')
+        .trim()
+        .split('\n')
+        .map((line) => line.split(' ')),
+    )
+    const current =
+      Number(readFileSync(`${scopePath}/memory.current`, 'utf8')) / 1048576
+    const maximum =
+      Number(readFileSync(`${scopePath}/memory.peak`, 'utf8')) / 1048576
+    scopePeak = Math.max(scopePeak, maximum)
+    return { current, oomKills: Number(events.oom_kill || 0) }
+  } catch {
+    return null
+  }
+}
 const saveOwner = () =>
   writeFileSync(
     pidFile,
@@ -215,6 +250,7 @@ function treeRss(pid) {
 }
 
 async function run(cli, args, stageHeap = heap, isNode = true) {
+  const initialOomKills = scopeMemory()?.oomKills || 0
   const command = isNode ? process.execPath : cli
   const commandArgs = isNode
     ? [`--max-old-space-size=${stageHeap}`, cli, ...args]
@@ -241,7 +277,7 @@ async function run(cli, args, stageHeap = heap, isNode = true) {
         NODE_ENV: mode === 'dev' ? 'development' : 'production',
         NEXT_TELEMETRY_DISABLED: '1',
         SHARP_IGNORE_GLOBAL_LIBVIPS: '1',
-        RAYON_NUM_THREADS: isBuild ? '1' : '2',
+        RAYON_NUM_THREADS: '1',
         UV_THREADPOOL_SIZE: '2',
         GOMAXPROCS: '2',
         GOMEMLIMIT: `${Math.min(stageHeap, 768)}MiB`,
@@ -255,11 +291,14 @@ async function run(cli, args, stageHeap = heap, isNode = true) {
   let exceeded = false
   const timer = setInterval(() => {
     const rss = treeRss(child.pid)
+    const scoped = scopeMemory()
     peak = Math.max(peak, rss)
-    if (rss > budget && !exceeded) {
+    const usage = scoped?.current ?? rss
+    const limit = scopePath ? budget - 128 : budget
+    if (usage > limit && !exceeded) {
       exceeded = true
       console.error(
-        `Shiro 编译进程树达到 ${Math.ceil(rss)} MiB，超过 ${budget} MiB 预算，正在停止。`,
+        `Shiro 编译任务达到 ${Math.ceil(usage)} MiB，正在停止并保留 ${budget - limit} MiB 余量。`,
       )
       stop()
     }
@@ -274,24 +313,33 @@ async function run(cli, args, stageHeap = heap, isNode = true) {
   clearInterval(timer)
   child = undefined
   saveOwner()
-  return exceeded ? 137 : code
+  const wasOomKilled = (scopeMemory()?.oomKills || 0) > initialOomKills
+  return exceeded || wasOomKilled ? 137 : code
 }
 
 console.log(
   `Shiro ${mode}: process-tree budget ${budget} MiB, V8 heap ${heap} MiB, one compiler at a time.`,
 )
-if (mode === 'dev' || mode === 'typecheck' || isBuild)
-  {await import('./prepare-assets.mjs')}
 let code = 0
+if (mode === 'dev' || mode === 'typecheck' || mode === 'vendors' || isBuild) {
+  console.log('Batch 1: prepare styles, syntax grammars and diagram assets.')
+  code = await run(resolve(root, 'scripts/prepare-assets.mjs'), [], 384)
+  if (code === 0 && !cancelled) {
+    code = await run(resolve(root, 'scripts/prepare-excalidraw.mjs'), [], 512)
+  }
+}
 if (isBuild || mode === 'typecheck') {
-  code = await run(
-    resolve(
-      dirname(require.resolve('@typescript/native/package.json')),
-      'bin/tsc',
-    ),
-    ['--noEmit', '--singleThreaded'],
-    Math.min(heap, 768),
-  )
+  console.log('Batch 3: check application types in a separate process.')
+  if (code === 0 && !cancelled) {
+    code = await run(
+      resolve(
+        dirname(require.resolve('@typescript/native/package.json')),
+        'bin/tsc',
+      ),
+      ['--noEmit', '--singleThreaded'],
+      Math.min(heap, 768),
+    )
+  }
 }
 if (mode === 'lint') {
   code = await run(
@@ -301,6 +349,9 @@ if (mode === 'lint') {
 }
 if (mode === 'deploy') code = await run('docker', extra, heap, false)
 if (code === 0 && !cancelled && ['dev', 'build', 'analyze'].includes(mode)) {
+  if (isBuild) {
+    console.log('Batch 4: compile application routes with one compiler thread.')
+  }
   const bundler =
     process.env.SHIRO_BUNDLER === 'webpack' ? '--webpack' : '--turbopack'
   const args =
@@ -312,12 +363,22 @@ if (code === 0 && !cancelled && ['dev', 'build', 'analyze'].includes(mode)) {
 writeFileSync(
   resolve(runtime, 'last-run.json'),
   JSON.stringify(
-    { mode, budgetMiB: budget, peakRssMiB: Math.ceil(peak), code },
+    {
+      mode,
+      budgetMiB: budget,
+      peakRssMiB: Math.ceil(peak),
+      peakScopeMiB: Math.ceil(scopePeak),
+      code,
+    },
     null,
     2,
   ),
 )
+writeFileSync(
+  resolve(runtime, `${mode}-result.json`),
+  readFileSync(resolve(runtime, 'last-run.json')),
+)
 console.log(
-  `Shiro ${mode}: measured process-tree peak ${Math.ceil(peak)} MiB; exit ${code}.`,
+  `Shiro ${mode}: process-tree peak ${Math.ceil(peak)} MiB; cgroup peak ${Math.ceil(scopePeak)} MiB; exit ${code}.`,
 )
 process.exit(code)

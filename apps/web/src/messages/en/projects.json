@@ -1,3 +1,5 @@
 {
-  "page_title": "Projects"
+  "page_title": "Projects",
+  "cached_projects": "GitHub is temporarily unavailable or rate limited. Showing the last synced public repositories.",
+  "sync_error": "Some projects could not be synced. Please refresh later. Loaded projects remain available."
 }

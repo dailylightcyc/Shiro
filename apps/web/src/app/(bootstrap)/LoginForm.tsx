@@ -57,6 +57,9 @@ export default function LoginForm() {
             <a className={buttonClass} href={adminUrl}>
               进入 CMS 后台
             </a>
+            <a className={buttonClass} href="/dashboard">
+              绑定 GitHub
+            </a>
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-5">

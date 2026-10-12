@@ -12,7 +12,6 @@ import { Paper } from '~/components/layout/container/Paper'
 import { NoteMetaBar, NoteRootBanner } from '~/components/modules/note'
 import { NoteHeadCover } from '~/components/modules/note/NoteHeadCover'
 import { ArticleRightAside } from '~/components/modules/shared/ArticleRightAside'
-import { ReadIndicatorForMobile } from '~/components/modules/shared/ReadIndicator'
 import { jotaiStore } from '~/lib/store'
 import { isNoteModel, isPageModel, isPostModel } from '~/lib/url-builder'
 import type {
@@ -141,8 +140,9 @@ export default function PreviewPage() {
         if (
           JSON.stringify(jotaiStore.get(previewDataAtom)) ===
           JSON.stringify(parsedData.data)
-        )
+        ) {
           return
+        }
 
         jotaiStore.set(previewDataAtom, simpleCamelcaseKeys(parsedData.data))
       }
@@ -298,7 +298,6 @@ const PagePreview = () => {
             </header>
 
             <WrappedElementProvider eoaDetect>
-              <ReadIndicatorForMobile />
               <MarkdownImageRecordProviderInternal>
                 <PageMarkdown />
               </MarkdownImageRecordProviderInternal>

@@ -3,8 +3,15 @@ import { createAuthClient } from 'better-auth/react'
 
 import { API_URL } from '~/constants/env'
 
+import { resolveCmsAuthUrl } from './auth-url'
+
 export const authClient = createAuthClient({
-  baseURL: `${API_URL}/auth`,
+  baseURL: resolveCmsAuthUrl(
+    API_URL,
+    typeof window === 'undefined'
+      ? process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:2323'
+      : window.location.origin,
+  ),
   plugins: [usernameClient()],
   fetchOptions: {
     credentials: 'include',

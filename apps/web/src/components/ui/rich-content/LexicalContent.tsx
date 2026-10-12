@@ -15,10 +15,10 @@ import clsx from 'clsx'
 import type { SerializedEditorState } from 'lexical'
 import { useMemo } from 'react'
 
-import { getWebUrl } from '~/atoms'
 import { API_URL } from '~/constants/env'
 import { useIsDark } from '~/hooks/common/use-is-dark'
 import { fetchGitHubApi } from '~/lib/github'
+import { useAggregationSelector } from '~/providers/root/aggregation-data-provider'
 
 import { CmsRichRenderer } from './CmsRichRenderer'
 
@@ -96,7 +96,7 @@ const linkCardFetchContext: LinkCardFetchContext = {
 }
 
 function LinkCardWithMxSpace(props: EnhancedLinkCardProps) {
-  const webUrl = getWebUrl()
+  const webUrl = useAggregationSelector((data) => data.url.webUrl)
   const plugins = useMemo(() => {
     if (!webUrl) return
     return [createMxSpacePlugin({ webUrl })]

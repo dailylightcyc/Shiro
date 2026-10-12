@@ -17,7 +17,6 @@ import { TiltedSendIcon } from '~/components/icons/TiltedSendIcon'
 import { LoadMoreIndicator } from '~/components/modules/shared/LoadMoreIndicator'
 import { MotionButtonBase } from '~/components/ui/button'
 import { Loading } from '~/components/ui/loading'
-import { usePrevious } from '~/hooks/common/use-previous'
 import { preventDefault } from '~/lib/dom'
 import { apiClient } from '~/lib/request'
 
@@ -113,9 +112,7 @@ const PostBox = () => {
 }
 
 const List = () => {
-  const [hasNext, setHasNext] = useState(true)
-
-  const { data, isLoading, fetchNextPage } = useInfiniteQuery({
+  const { data, isLoading, fetchNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: QUERY_KEY,
     queryFn: async ({ pageParam }) => {
       const data = await apiClient.shorthand.getList({
@@ -123,28 +120,23 @@ const List = () => {
         size: FETCH_SIZE,
       })
 
-      if (data.length < FETCH_SIZE) {
-        setHasNext(false)
-      }
       return data
     },
-    enabled: hasNext,
     refetchOnMount: true,
 
-    getNextPageParam: (l) => (l.length > 0 ? l.at(-1)?.id : undefined),
+    getNextPageParam: (page) =>
+      page.length === FETCH_SIZE ? page.at(-1)?.id : undefined,
     initialPageParam: undefined as undefined | string,
   })
 
   const [scope, animate] = useAnimate()
 
-  const getPrevData = usePrevious(data)
   useEffect(() => {
-    if (!data) return
-    const pages = getPrevData()?.pages
-    const count = pages?.reduce((acc, cur) => acc + cur.length, 0)
+    const items = scope.current?.querySelectorAll(':scope > li')
+    if (!items?.length) return
 
-    animate(
-      'li',
+    const animation = animate(
+      Array.from(items),
       {
         opacity: 1,
         y: 0,
@@ -153,13 +145,13 @@ const List = () => {
         duration: 0.2,
         delay: stagger(0.1, {
           startDelay: 0.15,
-          from: count ? count - FETCH_SIZE : 0,
         }),
       },
     )
-  }, [data])
+    return () => animation.stop()
+  }, [data, animate, scope])
 
-  if (isLoading) <Loading useDefaultLoadingText />
+  if (isLoading) return <Loading useDefaultLoadingText />
 
   return (
     <ul ref={scope}>
@@ -167,7 +159,7 @@ const List = () => {
         page.map((item) => <ThinkingItem item={item} key={item.id} />),
       )}
 
-      {hasNext && (
+      {hasNextPage && (
         <LoadMoreIndicator
           onLoading={() => {
             fetchNextPage()

@@ -17,7 +17,7 @@ export const ScriptInjectProvider = async () => {
         />
       )}
       {js && (
-        <script
+        <Script
           id="shiro-custom-js"
           dangerouslySetInnerHTML={{
             __html: js.join('\n'),
